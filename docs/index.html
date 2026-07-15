@@ -6,7 +6,7 @@
     <title>SUB/WAVE Web Player — build your own radio player</title>
     <meta
       name="description"
-      content="A lean, forkable reference web player for a SUB/WAVE internet radio station. Clone it, restyle it with a coding agent, deploy it — and a guide to building your own player against the SUB/WAVE public API."
+      content="A small, forkable reference web player for a SUB/WAVE internet radio station. Clone it, restyle it with a coding agent, and deploy it. Plus a guide to building your own player against the SUB/WAVE public API."
     />
     <link
       rel="icon"
@@ -213,15 +213,15 @@
     <header class="hero">
       <div class="wrap">
         <div class="dateline">
-          <span>SUB/WAVE — The Field Manual</span>
+          <span>SUB/WAVE · The Field Manual</span>
           <span>Open Source · MIT</span>
           <span>getsubwave.com</span>
         </div>
         <h1 class="serif">Build your own <em>radio&nbsp;player</em></h1>
         <p class="dek">
-          A lean, forkable reference player for a SUB/WAVE internet radio station. Clone it, restyle
-          it — by hand or by telling a coding agent the vibe — and deploy in minutes. Plus a guide to
-          building any player against the SUB/WAVE public API.
+          A small, forkable reference player for a SUB/WAVE internet radio station. Clone it, restyle
+          it by hand or by describing the vibe to a coding agent, then deploy it. There's also a guide
+          here for building your own player from scratch against the SUB/WAVE public API.
         </p>
         <div class="cta">
           <a class="btn primary" href="#start">Get started</a>
@@ -238,7 +238,7 @@
         <p class="sub">
           <a href="https://github.com/perminder-klair/subwave">SUB/WAVE</a> is a personal internet
           radio station: one shared Icecast stream, an AI DJ picking tracks and talking between them.
-          Everyone hears the same broadcast at the same time — it's <em>radio</em>, not a playlist.
+          Everyone hears the same broadcast at the same time. It's <em>radio</em>, not a playlist.
           This repo is a reference <strong>web player</strong> for it, built to be gutted and made
           your own.
         </p>
@@ -253,7 +253,7 @@
           </div>
           <div class="card">
             <h3><span class="serif" style="color: var(--accent)">§</span> Agent-ready</h3>
-            <p>Ships an <code>AGENTS.md</code> and built-in skills, so Claude Code or Cursor already know how it's wired — describe the vibe and go.</p>
+            <p>Ships an <code>AGENTS.md</code> and built-in skills, so Claude Code or Cursor already understand how it's wired. Describe the vibe and go.</p>
           </div>
         </div>
       </div>
@@ -263,7 +263,7 @@
       <div class="wrap">
         <span class="kicker">Quick start · by hand</span>
         <h2 class="serif">Clone, run, done.</h2>
-        <p class="sub">React + Vite + TypeScript + Tailwind. It ships pointed at the live public station, so it plays real radio the moment you run it — no config.</p>
+        <p class="sub">React + Vite + TypeScript + Tailwind. It comes pointed at the live public station, so it plays real radio the moment you run it. No config to fill in first.</p>
         <pre><span class="c"># clone and run</span>
 git clone https://github.com/getsubwave/web-player.git
 cd web-player
@@ -272,7 +272,7 @@ npm run dev        <span class="c"># → http://localhost:5173</span></pre>
         <p class="muted">
           <code>npm run build</code> produces a static <code>dist/</code> you can host anywhere.
           Point it at your own station by setting <code>VITE_STATION_URL</code> in a <code>.env</code>
-          file — everything derives from that one origin.
+          file, and everything else derives from that one origin.
         </p>
       </div>
     </section>
@@ -280,10 +280,10 @@ npm run dev        <span class="c"># → http://localhost:5173</span></pre>
     <section id="agents">
       <div class="wrap">
         <span class="kicker">Quick start · with agents</span>
-        <h2 class="serif">Describe it. Let the agent build it.</h2>
+        <h2 class="serif">Describe the look and let the agent build it.</h2>
         <p class="sub">
-          Prefer to <em>describe</em> the player you want and let a coding agent build it? This repo
-          is set up for exactly that. No coding experience required.
+          Would rather just say what you want and let a coding agent write it? The repo is set up for
+          that, and you don't need to know how to code.
         </p>
         <div class="grid cols-3">
           <div class="card">
@@ -296,13 +296,13 @@ npm run dev        <span class="c"># → http://localhost:5173</span></pre>
           </div>
           <div class="card">
             <h3><span class="num">3</span> See it, ship it</h3>
-            <p>Ask the agent to run the dev server, then to deploy — Vercel, Netlify, or Docker. Keep iterating in plain English.</p>
+            <p>Ask the agent to run the dev server, then to deploy it to Vercel, Netlify, or Docker. Keep iterating in plain English.</p>
           </div>
         </div>
         <h3 class="kicker" style="margin-top: 30px">Example prompts</h3>
-        <blockquote>“Restyle this player like a warm 70s vinyl setup — cream, burnt orange and brown, chunky rounded panels, a serif logo.”</blockquote>
-        <blockquote>“Make it minimal black-and-white brutalist — monospace font, hard edges, no shadows.”</blockquote>
-        <blockquote>“Point this player at my station at https://radio.mysite.com, then deploy it to Vercel.”</blockquote>
+        <blockquote>“Restyle this like a warm 70s vinyl setup: cream, burnt orange and brown, chunky rounded panels, a serif logo.”</blockquote>
+        <blockquote>“Make it minimal black-and-white brutalist. Monospace font, hard edges, no shadows.”</blockquote>
+        <blockquote>“Point this at my station at https://radio.mysite.com, then deploy it to Vercel.”</blockquote>
         <p class="muted">Then keep going: <em>“make the accent pinker”</em>, <em>“bigger cover art”</em>, <em>“move the request box to the top”</em>. You never have to open the code.</p>
       </div>
     </section>
@@ -312,9 +312,9 @@ npm run dev        <span class="c"># → http://localhost:5173</span></pre>
         <span class="kicker">Guidelines</span>
         <h2 class="serif">Building your own player</h2>
         <p class="sub">
-          Want to build a player from scratch — for the web, a TV, an e-ink dashboard, anything?
-          Here are the load-bearing ideas. They apply whether you fork this repo or start fresh in
-          another framework.
+          Building a player from scratch, maybe for the web, a TV, or an e-ink dashboard? Here are the
+          ideas that carry the weight. They hold whether you fork this repo or start fresh in another
+          framework.
         </p>
 
         <h3>1. One origin, three things</h3>
@@ -322,7 +322,7 @@ npm run dev        <span class="c"># → http://localhost:5173</span></pre>
         <pre>const API   = `${stationUrl}/api`          <span class="c">// controller JSON</span>
 const AUDIO = `${stationUrl}/stream.mp3`   <span class="c">// Icecast MP3 (universal floor)</span>
 const COVER = `${API}/cover/${subsonicId}` <span class="c">// artwork proxy</span></pre>
-        <p class="muted">Everything is unauthenticated and CORS-open (<code>Access-Control-Allow-Origin: *</code>), and the Icecast mount sends the same — so a browser client can fetch and stream cross-origin from anywhere.</p>
+        <p class="muted">Everything is unauthenticated and CORS-open (<code>Access-Control-Allow-Origin: *</code>), and the Icecast mount sends the same, so a browser client can fetch and stream cross-origin from anywhere.</p>
 
         <h3>2. Poll, don't subscribe</h3>
         <p class="muted">There's no websocket. Poll <code>/now-playing</code>, <code>/state</code> and <code>/session</code> on a timer (5s is plenty) and render the latest snapshot. Pause polling when the tab is hidden; keep the last good snapshot on a failed fetch so the UI never blanks.</p>
@@ -332,7 +332,7 @@ const COVER = `${API}/cover/${subsonicId}` <span class="c">// artwork proxy</spa
           <div class="card">
             <h3 style="margin-top: 0; color: var(--accent)" class="serif">Do</h3>
             <p>
-              <span class="pill">tune-in on tap</span> browsers block autoplay — start audio from a user gesture.
+              <span class="pill">tune-in on tap</span> browsers block autoplay, so start audio from a user gesture.
               <span class="pill">an off-air state</span> the track can be <code>null</code> even when online.
               <span class="pill">optional fields</span> a fresh track has no BPM/mood; a jingle has no cover.
             </p>
@@ -340,7 +340,7 @@ const COVER = `${API}/cover/${subsonicId}` <span class="c">// artwork proxy</spa
           <div class="card">
             <h3 style="margin-top: 0; color: var(--accent)" class="serif">Don't</h3>
             <p>
-              <span class="pill">no skip / next</span> one shared stream — skipping would skip for everyone.
+              <span class="pill">no skip / next</span> one shared stream, so skipping would skip for everyone.
               <span class="pill">no seek bar</span> the playhead is client-side and approximate.
               <span class="pill">no per-listener shuffle</span> it's a broadcast, not a queue you own.
             </p>
@@ -362,12 +362,12 @@ const COVER = `${API}/cover/${subsonicId}` <span class="c">// artwork proxy</spa
           <tbody>
             <tr><td><code>GET /now-playing</code></td><td>Current track + cover art + acoustic tags (genre·BPM·key·mood·energy), on-air DJ persona + show + guests, listener count, stream bitrate, LLM token ticker.</td></tr>
             <tr><td><code>GET /state</code></td><td>Queue (up next) + history (recently played) + DJ log.</td></tr>
-            <tr><td><code>GET /session</code></td><td>The Booth feed — the live DJ session's chat turns (what the AI DJ said/queued).</td></tr>
+            <tr><td><code>GET /session</code></td><td>The Booth feed: the live DJ session's chat turns (what the AI DJ said/queued).</td></tr>
             <tr><td><code>GET /schedule</code></td><td>The weekly 7×24 grid + shows + personas, in station-local time.</td></tr>
             <tr><td><code>POST /request</code></td><td>Submit a plain-language song request → returns a <code>requestId</code>.</td></tr>
             <tr><td><code>GET /request/:id</code></td><td>Poll a request's outcome (<code>pending</code> / <code>resolved</code> / <code>failed</code>).</td></tr>
             <tr><td><code>GET /cover/:id</code></td><td>Cover-art proxy (safe for lock-screen artwork).</td></tr>
-            <tr><td><code>GET /health</code></td><td>Liveness — <code>{"status":"on-air"}</code>.</td></tr>
+            <tr><td><code>GET /health</code></td><td>Liveness. Returns <code>{"status":"on-air"}</code>.</td></tr>
             <tr><td><code>GET /stream.mp3</code></td><td>The audio itself (Icecast; not under <code>/api</code>).</td></tr>
           </tbody>
         </table>
@@ -379,7 +379,7 @@ const COVER = `${API}/cover/${subsonicId}` <span class="c">// artwork proxy</spa
       <div class="wrap">
         <span class="kicker">Ship it</span>
         <h2 class="serif">Deploy</h2>
-        <p class="sub">It's a static SPA, so it goes to any static host in one click — or run it as a container.</p>
+        <p class="sub">It's a static SPA, so it goes to any static host in one click. Or run it as a container.</p>
         <p class="deploybtns">
           <a href="https://vercel.com/new/clone?repository-url=https://github.com/getsubwave/web-player"><img alt="Deploy with Vercel" src="https://vercel.com/button" /></a>
           <a href="https://app.netlify.com/start/deploy?repository=https://github.com/getsubwave/web-player"><img alt="Deploy to Netlify" src="https://www.netlify.com/img/deploy/button.svg" /></a>
@@ -387,7 +387,7 @@ const COVER = `${API}/cover/${subsonicId}` <span class="c">// artwork proxy</spa
         </p>
         <pre><span class="c"># or with Docker</span>
 docker compose up -d --build   <span class="c"># → http://localhost:8080</span></pre>
-        <p class="muted"><code>VITE_STATION_URL</code> is baked in at build time — set it as a build arg / env var to lock a deployment to your own station, then rebuild.</p>
+        <p class="muted"><code>VITE_STATION_URL</code> is baked in at build time, so set it as a build arg or env var to lock a deployment to your own station, then rebuild.</p>
       </div>
     </section>
 
