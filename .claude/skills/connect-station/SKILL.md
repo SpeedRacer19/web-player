@@ -52,9 +52,27 @@ So:
   env var), never just a restart.
 
 If the user swears they changed the URL "but it still shows the old station",
-this is almost always why. Confirm which env the value is actually baked into:
-`grep -o 'https\?://[^"]*/api' dist/assets/*.js` shows what a built bundle points
-at.
+it's almost always one of these two:
+
+1. **The bundle was never rebuilt** (or the dev server wasn't restarted) — see
+   above. Confirm what origin a built bundle actually points at:
+
+   ```bash
+   grep -oE 'https?://[a-zA-Z0-9.:_-]+' dist/assets/*.js | sort -u
+   ```
+
+   Grep for the bare **origin**, not `origin/api`: `config.ts` builds the API URL
+   as `` `${STATION_URL}/api` ``, so after minification the origin and `/api` are
+   separate string literals and there is no contiguous `.../api` substring to
+   match.
+
+2. **A stale `.env.local` is winning.** Vite loads `.env.local` at higher
+   priority than `.env`, so if one exists with an old `VITE_STATION_URL`, editing
+   `.env` silently has no effect. Check for it: `ls -la .env*` and reconcile.
+
+Also note `.env` is gitignored — the change is local only. For a deployed build
+the station URL must be supplied to the build/deploy environment separately (a
+build arg / platform env var), not via a committed file.
 
 ## Verifying a station is reachable before blaming the player
 
