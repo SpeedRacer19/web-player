@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SUB/WAVE Web Player — build your own radio player</title>
+    <meta
+      name="description"
+      content="A lean, forkable reference web player for a SUB/WAVE internet radio station. Clone it, restyle it with a coding agent, deploy it — and a guide to building your own player against the SUB/WAVE public API."
+    />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0a0f'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%236ee7ff' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23a78bfa'/%3E%3C/svg%3E"
+    />
+    <style>
+      :root {
+        --bg: #0a0a0f;
+        --panel: #14141d;
+        --panel-2: #1c1c28;
+        --fg: #f3f3f7;
+        --muted: #8b8b9a;
+        --accent: #6ee7ff;
+        --accent-2: #a78bfa;
+        --line: #262636;
+        --radius: 16px;
+        color-scheme: dark;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { text-decoration: underline; }
+      code, pre {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+
+      /* Nav */
+      nav {
+        position: sticky; top: 0; z-index: 20;
+        background: color-mix(in srgb, var(--bg) 85%, transparent);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--line);
+      }
+      nav .wrap { display: flex; align-items: center; gap: 20px; height: 60px; }
+      .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+      .disc {
+        width: 30px; height: 30px; border-radius: 9px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        display: grid; place-items: center; color: #000; font-weight: 900;
+      }
+      nav .links { margin-left: auto; display: flex; gap: 22px; font-size: 14px; }
+      nav .links a { color: var(--muted); }
+      nav .links a:hover { color: var(--fg); text-decoration: none; }
+      @media (max-width: 640px) { nav .links { display: none; } }
+
+      /* Hero */
+      header.hero {
+        position: relative;
+        padding: 88px 0 64px;
+        text-align: center;
+        overflow: hidden;
+        border-bottom: 1px solid var(--line);
+      }
+      header.hero::before {
+        content: ""; position: absolute; inset: -40% 0 auto 0; height: 520px;
+        background: radial-gradient(600px 300px at 50% 0, color-mix(in srgb, var(--accent-2) 22%, transparent), transparent 70%);
+        pointer-events: none;
+      }
+      .eyebrow {
+        display: inline-block; font-size: 12px; letter-spacing: 0.18em; text-transform: uppercase;
+        color: var(--accent); border: 1px solid var(--line); border-radius: 999px;
+        padding: 5px 12px; margin-bottom: 22px; background: var(--panel);
+      }
+      header.hero h1 {
+        font-size: clamp(32px, 6vw, 56px); line-height: 1.05; margin: 0 0 16px; letter-spacing: -0.02em;
+      }
+      header.hero h1 .grad {
+        background: linear-gradient(120deg, var(--accent), var(--accent-2));
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+      }
+      header.hero p.lede { font-size: clamp(16px, 2.4vw, 20px); color: var(--muted); max-width: 640px; margin: 0 auto 30px; }
+      .cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+      .btn {
+        display: inline-flex; align-items: center; gap: 8px; padding: 11px 20px; border-radius: 12px;
+        font-weight: 600; font-size: 15px; border: 1px solid var(--line);
+      }
+      .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #000; border: 0; }
+      .btn.primary:hover { filter: brightness(1.08); text-decoration: none; }
+      .btn.ghost { background: var(--panel); color: var(--fg); }
+      .btn.ghost:hover { border-color: var(--accent); text-decoration: none; }
+
+      /* Sections */
+      section { padding: 60px 0; border-bottom: 1px solid var(--line); }
+      section h2 { font-size: clamp(24px, 3.6vw, 32px); margin: 0 0 8px; letter-spacing: -0.01em; }
+      section .sub { color: var(--muted); margin: 0 0 28px; max-width: 660px; }
+      h3 { font-size: 18px; margin: 28px 0 8px; }
+
+      .grid { display: grid; gap: 18px; }
+      @media (min-width: 720px) { .grid.cols-3 { grid-template-columns: repeat(3, 1fr); } .grid.cols-2 { grid-template-columns: repeat(2, 1fr); } }
+      .card {
+        background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px;
+      }
+      .card h3 { margin-top: 0; display: flex; align-items: center; gap: 8px; }
+      .card p { color: var(--muted); margin: 0; font-size: 15px; }
+      .num {
+        width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center;
+        background: var(--panel-2); color: var(--accent); font-size: 13px; font-weight: 700; flex: none;
+      }
+
+      pre {
+        background: #07070c; border: 1px solid var(--line); border-radius: 12px;
+        padding: 16px 18px; overflow-x: auto; font-size: 13.5px; color: #d7d7e6; margin: 14px 0;
+      }
+      pre .c { color: var(--muted); }
+      p code, li code { background: var(--panel-2); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; font-size: 13px; }
+
+      blockquote {
+        margin: 12px 0; padding: 12px 16px; border-left: 3px solid var(--accent-2);
+        background: var(--panel); border-radius: 0 10px 10px 0; color: var(--fg);
+      }
+
+      table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14.5px; display: block; overflow-x: auto; }
+      th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+      th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+      td code { white-space: nowrap; }
+
+      .split { display: grid; gap: 18px; }
+      @media (min-width: 760px) { .split { grid-template-columns: 1fr 1fr; } }
+      .pill { display: inline-block; font-size: 12px; color: var(--accent); background: var(--panel-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; margin: 0 6px 6px 0; }
+
+      footer { padding: 44px 0; text-align: center; color: var(--muted); font-size: 14px; }
+      footer a { color: var(--muted); }
+      .deploybtns img { height: 32px; margin: 6px; vertical-align: middle; }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div class="wrap">
+        <span class="brand"><span class="disc">◉</span> SUB/WAVE Player</span>
+        <span class="links">
+          <a href="#start">Quick start</a>
+          <a href="#agents">With agents</a>
+          <a href="#build">Build your own</a>
+          <a href="#api">Station API</a>
+          <a href="https://github.com/getsubwave/web-player">GitHub</a>
+        </span>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Reference web player · open source</span>
+        <h1>Build your own <span class="grad">radio&nbsp;player</span><br />for a SUB/WAVE station</h1>
+        <p class="lede">
+          A lean, forkable player you clone, restyle, and deploy in minutes — by hand or by
+          telling a coding agent the vibe. And a guide to building any player against the
+          SUB/WAVE public API.
+        </p>
+        <div class="cta">
+          <a class="btn primary" href="#start">Get started</a>
+          <a class="btn ghost" href="https://github.com/getsubwave/web-player">★ View on GitHub</a>
+          <a class="btn ghost" href="https://www.getsubwave.com/listen">See a live player ↗</a>
+        </div>
+      </div>
+    </header>
+
+    <section id="what">
+      <div class="wrap">
+        <h2>What this is</h2>
+        <p class="sub">
+          <a href="https://github.com/perminder-klair/subwave">SUB/WAVE</a> is a personal internet
+          radio station: one shared Icecast stream, an AI DJ picking tracks and talking between
+          them. Everyone hears the same broadcast at the same time — it's <em>radio</em>, not a
+          playlist. This repo is a reference <strong>web player</strong> for it, built to be gutted
+          and made your own.
+        </p>
+        <div class="grid cols-3">
+          <div class="card">
+            <h3>🎛️ Full-featured</h3>
+            <p>Now-playing with cover art and acoustic tags, live listener count, the AI DJ's booth feed, song requests, and the weekly schedule.</p>
+          </div>
+          <div class="card">
+            <h3>🧩 Forkable by design</h3>
+            <p>The data layer (API client + hooks) is cleanly split from the UI, so you keep the plumbing and rebuild only the look.</p>
+          </div>
+          <div class="card">
+            <h3>🤖 Agent-ready</h3>
+            <p>Ships an <code>AGENTS.md</code> and built-in skills, so Claude Code or Cursor already know how it's wired — describe the vibe and go.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="start">
+      <div class="wrap">
+        <h2>Quick start</h2>
+        <p class="sub">React + Vite + TypeScript + Tailwind. It ships pointed at the live public station, so it plays real radio the moment you run it — no config.</p>
+        <pre><span class="c"># clone and run</span>
+git clone https://github.com/getsubwave/web-player.git
+cd web-player
+npm install
+npm run dev        <span class="c"># → http://localhost:5173</span></pre>
+        <p style="color: var(--muted)">
+          <code>npm run build</code> produces a static <code>dist/</code> you can host anywhere.
+          Point it at your own station by setting <code>VITE_STATION_URL</code> in a <code>.env</code>
+          file — everything derives from that one origin.
+        </p>
+      </div>
+    </section>
+
+    <section id="agents">
+      <div class="wrap">
+        <h2>Quick start using agents</h2>
+        <p class="sub">
+          Prefer to <em>describe</em> the player you want and let a coding agent build it? This repo
+          is set up for exactly that. No coding experience required.
+        </p>
+        <div class="grid cols-3">
+          <div class="card">
+            <h3><span class="num">1</span> Hand it the repo</h3>
+            <p>Clone it and open the folder in your agent (Claude Code, Cursor…), or paste the repo URL and ask it to clone.</p>
+          </div>
+          <div class="card">
+            <h3><span class="num">2</span> Describe the look</h3>
+            <p>Talk like a designer, not a programmer. The <code>redesign-player</code> skill keeps the audio and live data working while it restyles.</p>
+          </div>
+          <div class="card">
+            <h3><span class="num">3</span> See it, ship it</h3>
+            <p>Ask it to run the dev server, then to deploy — Vercel, Netlify, or Docker. Keep iterating in plain English.</p>
+          </div>
+        </div>
+        <h3>Example prompts</h3>
+        <blockquote>“Restyle this player like a warm 70s vinyl setup — cream, burnt orange and brown, chunky rounded panels, a serif logo.”</blockquote>
+        <blockquote>“Make it minimal black-and-white brutalist — monospace font, hard edges, no shadows.”</blockquote>
+        <blockquote>“Point this player at my station at https://radio.mysite.com, then deploy it to Vercel.”</blockquote>
+        <p style="color: var(--muted)">Then keep going: <em>“make the accent pinker”</em>, <em>“bigger cover art”</em>, <em>“move the request box to the top”</em>. You never have to open the code.</p>
+      </div>
+    </section>
+
+    <section id="build">
+      <div class="wrap">
+        <h2>Building your own player</h2>
+        <p class="sub">
+          Want to build a player from scratch — for the web, a TV, an e-ink dashboard, anything?
+          Here are the load-bearing ideas. They apply whether you fork this repo or start fresh in
+          another framework.
+        </p>
+
+        <h3>1. One origin, three things</h3>
+        <p style="color: var(--muted)">Every SUB/WAVE deployment serves the same routes on one hostname. From a single station URL you derive everything:</p>
+        <pre>const API   = `${stationUrl}/api`         <span class="c">// controller JSON</span>
+const AUDIO = `${stationUrl}/stream.mp3`  <span class="c">// Icecast MP3 (universal floor)</span>
+const COVER = `${API}/cover/${subsonicId}` <span class="c">// artwork proxy</span></pre>
+        <p style="color: var(--muted)">Everything is unauthenticated and CORS-open (<code>Access-Control-Allow-Origin: *</code>), and the Icecast mount sends the same — so a browser client can fetch and stream cross-origin from anywhere.</p>
+
+        <h3>2. Poll, don't subscribe</h3>
+        <p style="color: var(--muted)">There's no websocket. Poll <code>/now-playing</code>, <code>/state</code> and <code>/session</code> on a timer (5s is plenty) and render the latest snapshot. Pause polling when the tab is hidden; keep the last good snapshot on a failed fetch so the UI never blanks.</p>
+
+        <h3>3. Respect live-radio rules</h3>
+        <div class="split">
+          <div class="card">
+            <h3 style="color: var(--fg)">Do</h3>
+            <p>
+              <span class="pill">tune-in on tap</span> browsers block autoplay — start audio from a user gesture.
+              <span class="pill">an off-air state</span> the track can be <code>null</code> even when online.
+              <span class="pill">optional fields</span> a fresh track has no BPM/mood; a jingle has no cover.
+            </p>
+          </div>
+          <div class="card">
+            <h3 style="color: var(--fg)">Don't</h3>
+            <p>
+              <span class="pill">no skip / next</span> one shared stream — skipping would skip for everyone.
+              <span class="pill">no seek bar</span> the playhead is client-side and approximate.
+              <span class="pill">no per-listener shuffle</span> it's a broadcast, not a queue you own.
+            </p>
+          </div>
+        </div>
+
+        <h3>4. Split data from presentation</h3>
+        <p style="color: var(--muted)">The thing that makes a player easy to restyle: keep all fetching and audio in one thin layer (a client + a few hooks), and let the UI be a pure function of that data. Then a redesign never touches the plumbing. In this repo that's <code>src/lib/</code> + <code>src/hooks/</code> (keep) vs <code>src/components/</code> (rewrite).</p>
+      </div>
+    </section>
+
+    <section id="api">
+      <div class="wrap">
+        <h2>Station API reference</h2>
+        <p class="sub">The public surface a player consumes. Base is <code>${stationUrl}/api</code>; the stream is at <code>${stationUrl}/stream.mp3</code>.</p>
+        <table>
+          <thead><tr><th>Endpoint</th><th>Returns / powers</th></tr></thead>
+          <tbody>
+            <tr><td><code>GET /now-playing</code></td><td>Current track + cover art + acoustic tags (genre·BPM·key·mood·energy), on-air DJ persona + show + guests, listener count, stream bitrate, LLM token ticker.</td></tr>
+            <tr><td><code>GET /state</code></td><td>Queue (up next) + history (recently played) + DJ log.</td></tr>
+            <tr><td><code>GET /session</code></td><td>The Booth feed — the live DJ session's chat turns (what the AI DJ said/queued).</td></tr>
+            <tr><td><code>GET /schedule</code></td><td>The weekly 7×24 grid + shows + personas, in station-local time.</td></tr>
+            <tr><td><code>POST /request</code></td><td>Submit a plain-language song request → returns a <code>requestId</code>.</td></tr>
+            <tr><td><code>GET /request/:id</code></td><td>Poll a request's outcome (<code>pending</code> / <code>resolved</code> / <code>failed</code>).</td></tr>
+            <tr><td><code>GET /cover/:id</code></td><td>Cover-art proxy (safe for lock-screen artwork).</td></tr>
+            <tr><td><code>GET /health</code></td><td>Liveness — <code>{"status":"on-air"}</code>.</td></tr>
+            <tr><td><code>GET /stream.mp3</code></td><td>The audio itself (Icecast; not under <code>/api</code>).</td></tr>
+          </tbody>
+        </table>
+        <p style="color: var(--muted)">Optional mounts appear when the operator enables them: <code>/stream.opus</code>, <code>/stream.flac</code>, <code>/stream.aac</code>. MP3 is always served.</p>
+      </div>
+    </section>
+
+    <section id="deploy">
+      <div class="wrap">
+        <h2>Deploy</h2>
+        <p class="sub">It's a static SPA, so it goes to any static host in one click — or run it as a container.</p>
+        <p class="deploybtns">
+          <a href="https://vercel.com/new/clone?repository-url=https://github.com/getsubwave/web-player"><img alt="Deploy with Vercel" src="https://vercel.com/button" /></a>
+          <a href="https://app.netlify.com/start/deploy?repository=https://github.com/getsubwave/web-player"><img alt="Deploy to Netlify" src="https://www.netlify.com/img/deploy/button.svg" /></a>
+          <a href="https://deploy.workers.cloudflare.com/?url=https://github.com/getsubwave/web-player"><img alt="Deploy to Cloudflare" src="https://deploy.workers.cloudflare.com/button" /></a>
+        </p>
+        <pre><span class="c"># or with Docker</span>
+docker compose up -d --build   <span class="c"># → http://localhost:8080</span></pre>
+        <p style="color: var(--muted)"><code>VITE_STATION_URL</code> is baked in at build time — set it as a build arg / env var to lock a deployment to your own station, then rebuild.</p>
+      </div>
+    </section>
+
+    <footer>
+      <div class="wrap">
+        <p>
+          <a href="https://github.com/getsubwave/web-player">Repository</a> ·
+          <a href="https://www.getsubwave.com">SUB/WAVE</a> ·
+          <a href="https://www.getsubwave.com/listen">Live player</a> ·
+          <a href="https://github.com/perminder-klair/subwave">The station software</a>
+        </p>
+        <p>MIT licensed. Clone it, gut it, ship your own.</p>
+      </div>
+    </footer>
+  </body>
+</html>
