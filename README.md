@@ -23,6 +23,58 @@ npm run dev        # → http://localhost:5173 (plays the live public station)
 That's it — no config needed. `npm run build` produces a static `dist/` you can
 host anywhere.
 
+## Deploy
+
+It's a static single-page app (`vite build` → `dist/`), so it deploys to any
+static host in one click. These buttons clone this repo and auto-detect the Vite
+build:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/perminder-klair/subwave-web-player)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/perminder-klair/subwave-web-player)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/perminder-klair/subwave-web-player)
+
+> The buttons pull from a **public GitHub repo** — update the URLs above to point
+> at your own fork (they assume `github.com/perminder-klair/subwave-web-player`).
+
+**Build settings** (auto-detected by the above; enter manually on other hosts):
+
+| Setting | Value |
+| --- | --- |
+| Build command | `npm run build` |
+| Output directory | `dist` |
+| Node version | 20+ |
+
+**Docker.** A multi-stage `Dockerfile` builds the site and serves `dist/` with
+nginx; `docker-compose.yml` wraps it:
+
+```bash
+docker compose up -d --build       # → http://localhost:8080
+
+# tune the image at a specific station + port:
+VITE_STATION_URL=https://radio.example.com PORT=3000 docker compose up -d --build
+```
+
+Or without compose:
+
+```bash
+docker build -t subwave-player --build-arg VITE_STATION_URL=https://www.getsubwave.com .
+docker run -p 8080:80 subwave-player
+```
+
+Because `VITE_STATION_URL` is baked in at build time, changing the station means
+a rebuild (`--build`), not just a restart.
+
+**Railway / Render / Fly / any container host.** Point them at the `Dockerfile`
+above (Railway/Render both auto-detect it) and set `VITE_STATION_URL` as a build
+arg / env var. Prefer a static host? Build with `npm run build` and serve `dist/`
+— e.g. `npx serve -s dist -l $PORT`.
+
+**Pointing a deployment at a specific station.** `VITE_STATION_URL` is inlined at
+**build time** (all Vite `VITE_*` vars are), not read at runtime. To ship a build
+locked to your own station, set `VITE_STATION_URL` in the platform's environment
+variables and redeploy — a rebuild bakes it in. Left unset, the deployment tunes
+into the public station.
+
 ## Point it at your own station
 
 Every SUB/WAVE deployment serves the same routes on one hostname, so a single
