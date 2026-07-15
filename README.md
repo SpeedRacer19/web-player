@@ -23,6 +23,50 @@ npm run dev        # → http://localhost:5173 (plays the live public station)
 That's it — no config needed. `npm run build` produces a static `dist/` you can
 host anywhere.
 
+## Quick start using agents
+
+Would rather just *describe* the player you want and let a coding agent build it?
+This repo is set up for exactly that. It ships with an `AGENTS.md` and built-in
+skills, so agents like Claude Code and Cursor already understand how the player
+is wired — you describe the vibe, they do the code. No experience required.
+
+**1. Get the repo to your agent.** Clone it and open the folder in your coding
+agent:
+
+```bash
+git clone https://github.com/getsubwave/web-player.git && cd web-player
+```
+
+(or just paste the repo URL and ask the agent to clone it for you.)
+
+**2. Describe the look you want.** Talk to it like a designer, not a programmer —
+for example:
+
+> "Restyle this player like a warm 70s vinyl setup — cream, burnt orange and
+> brown, chunky rounded panels, a serif logo."
+
+> "Make it minimal black-and-white brutalist — monospace font, hard edges, no
+> shadows."
+
+> "Neon synthwave: dark blue, glowing pink and cyan accents, a subtle grid glow
+> behind the cover art."
+
+The player's `redesign-player` skill kicks in on its own and keeps the audio and
+live data working while it changes the look. Want your own station instead of the
+public one? Just say so:
+
+> "Point this player at my station at https://radio.mysite.com"
+
+**3. See it, then ship it.** Ask the agent to run and deploy it:
+
+> "Run it so I can see it." → it starts the dev server and gives you a link.
+>
+> "Deploy it to Vercel." (or Netlify, or "put it in Docker and run it")
+
+Then keep going in plain English — *"make the accent pinker"*, *"bigger cover
+art"*, *"move the request box to the top"*. Iterate until it's yours; you never
+have to open the code.
+
 ## Deploy
 
 It's a static single-page app (`vite build` → `dist/`), so it deploys to any
