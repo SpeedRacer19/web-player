@@ -29,12 +29,12 @@ It's a static single-page app (`vite build` → `dist/`), so it deploys to any
 static host in one click. These buttons clone this repo and auto-detect the Vite
 build:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/perminder-klair/subwave-web-player)
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/perminder-klair/subwave-web-player)
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/perminder-klair/subwave-web-player)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/getsubwave/web-player)
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/getsubwave/web-player)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/getsubwave/web-player)
 
 > The buttons pull from a **public GitHub repo** — update the URLs above to point
-> at your own fork (they assume `github.com/perminder-klair/subwave-web-player`).
+> at your own fork (they assume `github.com/getsubwave/web-player`).
 
 **Build settings** (auto-detected by the above; enter manually on other hosts):
 
