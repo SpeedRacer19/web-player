@@ -3,6 +3,8 @@
 A lean, forkable reference web player for a [SUB/WAVE](https://github.com/perminder-klair/subwave)
 internet radio station — **React + Vite + TypeScript + Tailwind**.
 
+📖 **[Guide & API docs → getsubwave.github.io/web-player](https://getsubwave.github.io/web-player/)**
+
 It ships pointed at the live public station, so it plays real radio the moment
 you run it. It's built to be **cloned and redesigned**: the data layer (API
 client + hooks) is cleanly separated from the presentation (components), so you
