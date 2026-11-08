@@ -1,7 +1,7 @@
 // The head unit's main screen, in a cyan VFD style: status row, cover art,
 // title/artist, the acoustic-tag strip (genre · BPM · key · mood — all
 // optional), what's up next (a column on wide screens, one line in place of
-// the album on mid-size ones, e.g. 1280px laptops), and a read-only segmented
+// the album on mid-size ones, e.g. tablets), and a read-only segmented
 // track clock. Reads the shared feed;
 // takes playback state as props from the head unit.
 //

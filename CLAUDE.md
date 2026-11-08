@@ -143,6 +143,11 @@ set of CSS custom properties (`--bg`, `--panel`, `--accent`, …) at the top of
 touching any component. Path alias `@/*` → `src/*` (in `vite.config.ts` +
 `tsconfig.app.json`).
 
+The car skin's wide layout (wheel + gauges, glovebox) uses one custom breakpoint,
+`cockpit:` (1400px, `@theme` in `src/index.css`). `WIDE` in `Dashboard.tsx`
+mirrors it for JS; change both together. Below it the gauges' readings show in
+the head unit's readout line instead.
+
 ## Deliberate non-goals
 
 Omitted to stay a lean starter (documented in README with their endpoints as

@@ -252,9 +252,9 @@ function loadDispMode() {
   }
 }
 
-// The wide (xl) layout has a real glovebox; below it, a pull handle + sheet.
+// The wide (cockpit, 1400px+) layout has a real glovebox; below it, a pull handle + sheet.
 // Only one of the two lyrics screens is ever mounted, so lyrics fetch once.
-const WIDE = '(min-width: 1280px)';
+const WIDE = '(min-width: 1400px)'; // keep in step with --breakpoint-cockpit
 function useWide() {
   return useSyncExternalStore(
     (cb) => {
@@ -298,14 +298,14 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
 
   return (
     <div
-      className={`dash relative z-10 ${mode.amber ? 'illum-amber' : ''} ${mode.dim ? 'illum-dim' : ''} px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pt-6 xl:px-0`}
+      className={`dash relative z-10 ${mode.amber ? 'illum-amber' : ''} ${mode.dim ? 'illum-dim' : ''} px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pt-6 cockpit:px-0`}
     >
       <div className="relative mx-auto flex items-stretch justify-center">
         {/* Driver side: binnacle + gauges, steering wheel in front. The same
             width as the passenger side, so the stereo sits centre screen.
             Both sides stop at 560px: on ultra-wide screens the extra width is
             plain dash at the outer edges, not an ever-bigger glovebox. */}
-        <div className="driver-side @container relative hidden min-w-0 max-w-[560px] flex-1 xl:block" aria-hidden>
+        <div className="driver-side @container relative hidden min-w-0 max-w-[560px] flex-1 cockpit:block" aria-hidden>
           {/* The gauges are set into the dash; the wheel sits in front of
               them, and the dash shows through its openings. */}
           <div className="binnacle">
@@ -321,8 +321,8 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
         </div>
 
         {/* Center stack: vents over the head unit. */}
-        <div className="center-stack relative z-10 w-full min-w-0 xl:w-[clamp(760px,60vw,1180px)] xl:flex-none xl:px-5">
-          <div className="mx-auto mb-4 hidden max-w-[920px] gap-4 sm:flex xl:max-w-[1140px]" aria-hidden>
+        <div className="center-stack relative z-10 w-full min-w-0 cockpit:w-[clamp(760px,60vw,1180px)] cockpit:flex-none cockpit:px-5">
+          <div className="mx-auto mb-4 hidden max-w-[920px] gap-4 sm:flex cockpit:max-w-[1140px]" aria-hidden>
             <div className="vent h-9 flex-1" />
             <div className="hazard" />
             <div className="vent h-9 flex-1" />
@@ -334,7 +334,7 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
             type="button"
             onClick={() => setGloveOpen((o) => !o)}
             aria-expanded={gloveOpen}
-            className="glovebox-pull mx-auto mt-3 flex h-9 w-full max-w-[900px] items-center justify-center gap-3 xl:hidden"
+            className="glovebox-pull mx-auto mt-3 flex h-9 w-full max-w-[900px] items-center justify-center gap-3 cockpit:hidden"
           >
             <span className="h-1.5 w-10 rounded-full bg-[#2c2733]" aria-hidden />
             GLOVEBOX · LYRICS
@@ -346,7 +346,7 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
             lid is hinged at the bottom and drops toward you; the lyrics screen
             is fitted inside. An outboard vent fills the space beyond it, when
             there is some. */}
-        <div className="passenger-side @container relative hidden min-w-0 max-w-[560px] flex-1 overflow-hidden xl:block">
+        <div className="passenger-side @container relative hidden min-w-0 max-w-[560px] flex-1 overflow-hidden cockpit:block">
           <div className="side-vent hidden @min-[500px]:block" aria-hidden />
           <div className="glovebox" data-open={gloveOpen || undefined}>
             <div className="glovebox-well">
@@ -368,7 +368,7 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
 
       {/* Small screens: the same compartment slides up as a sheet. */}
       {gloveOpen && !wide && (
-        <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center p-3 xl:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center p-3 cockpit:hidden">
           <div className="glovebox-well glovebox-sheet h-[min(60dvh,460px)] w-full max-w-[680px]">
             <LyricsScreen onClose={closeGlove} className="h-full w-full" />
           </div>

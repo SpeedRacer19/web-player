@@ -1,5 +1,13 @@
 @import 'tailwindcss';
 
+/* The full cockpit (steering wheel + gauges, stereo, glovebox) from here up;
+   below it the sides fold away, the stereo takes the width and the gauges
+   become a readout line. Use it as the `cockpit:` variant. Keep in step with
+   WIDE in Dashboard.tsx. */
+@theme {
+  --breakpoint-cockpit: 1400px;
+}
+
 /* ---------------------------------------------------------------------------
    Theme tokens. A redesigner can reskin the whole player by editing these
    custom properties before touching a single component — every component
@@ -698,7 +706,7 @@ body {
   opacity: 0.75;
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1400px) {
   /* The center stack reads as its own molded panel on wide screens. */
   .center-stack {
     padding-top: 18px;
