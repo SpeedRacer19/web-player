@@ -4,6 +4,23 @@ All notable changes to this player are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [1.4.0] — Unreleased
+
+### Changed
+- **The head unit grows on wide screens, then stops.** It now widens up to
+  1140px (from 920px), reached at about 1970px. The display gets up to 826px
+  (from 606px).
+- **More detail in up next** once the display is wide enough (about 1640px
+  screens and up): a small cover for each track, the album, who requested it
+  beside the title, and room for full titles.
+- **The glovebox stays a glovebox.** It grows with the dash up to 400px wide
+  and then stays put next to the stereo (on a 3440px screen it used to be over
+  1000px wide). An outboard air vent fills the space beyond it on wide screens.
+- On ultra-wide screens the cockpit stays together in the middle: each side
+  of the dash stops at 560px and the rest is plain dash.
+- Laptop sizes (1280–1440px) are unchanged. At 1920px the steering wheel is a
+  little smaller, because the stereo takes more of the width.
+
 ## [1.3.0] — 2026-11-08
 
 ### Added

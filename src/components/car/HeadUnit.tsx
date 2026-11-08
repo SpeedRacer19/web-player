@@ -284,7 +284,7 @@ export function HeadUnit({
   return (
     <section
       aria-label="Car stereo"
-      className="head-unit relative mx-auto w-full min-w-0 max-w-[920px] rounded-xl px-3 pb-3 pt-2 sm:px-5 sm:pb-4 sm:pt-3"
+      className="head-unit relative mx-auto w-full min-w-0 max-w-[920px] rounded-xl xl:max-w-[1140px] px-3 pb-3 pt-2 sm:px-5 sm:pb-4 sm:pt-3"
     >
       {/* Silkscreen */}
       <div className="mb-2 flex h-4 items-baseline justify-between gap-3 overflow-hidden whitespace-nowrap text-[10px] uppercase leading-4 tracking-[0.3em] text-[var(--chrome)]">

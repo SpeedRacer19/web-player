@@ -297,8 +297,10 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
     >
       <div className="relative mx-auto flex items-stretch justify-center">
         {/* Driver side: binnacle + gauges, steering wheel in front. The same
-            width as the passenger side, so the stereo sits centre screen. */}
-        <div className="driver-side relative hidden min-w-0 flex-1 xl:block" aria-hidden>
+            width as the passenger side, so the stereo sits centre screen.
+            Both sides stop at 560px: on ultra-wide screens the extra width is
+            plain dash at the outer edges, not an ever-bigger glovebox. */}
+        <div className="driver-side relative hidden min-w-0 max-w-[560px] flex-1 xl:block" aria-hidden>
           <div className="wheel-clip">
             <div className="wheel-rig">
               <div className="binnacle">
@@ -312,8 +314,8 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
         </div>
 
         {/* Center stack: vents over the head unit. */}
-        <div className="center-stack relative z-10 w-full min-w-0 xl:w-[clamp(760px,60vw,960px)] xl:flex-none xl:px-5">
-          <div className="mx-auto mb-4 hidden max-w-[920px] gap-4 sm:flex" aria-hidden>
+        <div className="center-stack relative z-10 w-full min-w-0 xl:w-[clamp(760px,60vw,1180px)] xl:flex-none xl:px-5">
+          <div className="mx-auto mb-4 hidden max-w-[920px] gap-4 sm:flex xl:max-w-[1140px]" aria-hidden>
             <div className="vent h-9 flex-1" />
             <div className="hazard" />
             <div className="vent h-9 flex-1" />
@@ -333,9 +335,12 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
           </button>
         </div>
 
-        {/* Passenger side: the glovebox. The lid is hinged at the bottom and
-            drops toward you; the lyrics screen is fitted inside. */}
-        <div className="passenger-side relative hidden min-w-0 flex-1 overflow-hidden xl:block">
+        {/* Passenger side: the glovebox, a fixed size next to the stereo. The
+            lid is hinged at the bottom and drops toward you; the lyrics screen
+            is fitted inside. An outboard vent fills the space beyond it, when
+            there is some. */}
+        <div className="passenger-side @container relative hidden min-w-0 max-w-[560px] flex-1 overflow-hidden xl:block">
+          <div className="side-vent hidden @min-[500px]:block" aria-hidden />
           <div className="glovebox" data-open={gloveOpen || undefined}>
             <div className="glovebox-well">
               {gloveOpen && wide && <LyricsScreen onClose={closeGlove} className="h-full w-full" />}

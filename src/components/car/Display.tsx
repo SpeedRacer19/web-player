@@ -86,25 +86,62 @@ function Cover({ track, trackKey }: { track: NowPlayingTrack | null; trackKey?: 
   );
 }
 
+/** A small cover for an up-next entry (wide screens). Lazy, so it isn't
+ *  fetched while hidden on narrower ones. */
+function Thumb({ id, seed }: { id?: string; seed?: string }) {
+  const src = id ? coverUrl(id) : null;
+  const [broken, setBroken] = useState<string | null>(null);
+  return (
+    <div className="relative hidden h-10 w-10 shrink-0 overflow-hidden rounded-[2px] ring-1 ring-black @min-[600px]:block">
+      {src && broken !== src ? (
+        <img src={src} alt="" loading="lazy" className="lcd-cover h-full w-full object-cover" onError={() => setBroken(src)} />
+      ) : (
+        <div className="h-full w-full opacity-70" style={{ background: gradientFor(seed) }} />
+      )}
+      <div className="lcd-cover-tint pointer-events-none absolute inset-0" />
+    </div>
+  );
+}
+
 /** The next track or two, in a column on the right of the screen. Only shown
  *  once the screen is wide enough (a container query on the body), so phones
- *  keep the full-width now-playing view. */
+ *  keep the full-width now-playing view. On the widest screens (the head unit
+ *  tops out there) each entry also gets its cover and album, and the column
+ *  gets room for full titles. */
 function UpNext() {
   const next = useUpNext(2);
   return (
-    <div className="hidden w-[36%] max-w-[240px] shrink-0 flex-col justify-center border-l border-[color-mix(in_srgb,var(--lcd-fg)_25%,transparent)] pl-3 @min-[420px]:flex sm:pl-4">
+    <div className="hidden w-[36%] max-w-[240px] shrink-0 flex-col justify-center border-l border-[color-mix(in_srgb,var(--lcd-fg)_25%,transparent)] pl-3 @min-[420px]:flex @min-[600px]:w-[46%] @min-[600px]:max-w-[380px] sm:pl-4">
       <div className="mb-1 h-4 text-[10px] leading-4 tracking-[0.25em] opacity-55 sm:text-[11px]">NEXT ▸</div>
       {next.length === 0 ? (
         <div className="text-[11px] uppercase tracking-wider opacity-55">DJ’s choice</div>
       ) : (
         next.map((e, i) => (
-          <div key={`${e.subsonic_id ?? e.title}-${i}`} className={`min-w-0 ${i ? 'mt-1.5 opacity-55' : ''}`}>
-            <div className="truncate text-xs font-bold uppercase leading-4 tracking-wider sm:text-[13px] sm:leading-5">
-              {e.title || 'Unknown track'}
-            </div>
-            <div className="truncate text-[11px] leading-4 opacity-80">
-              {e.artist}
-              {e.requestedBy && <span className="opacity-80">{e.artist ? ' · ' : ''}♥ {e.requestedBy}</span>}
+          <div
+            key={`${e.subsonic_id ?? e.title}-${i}`}
+            className={`flex min-w-0 items-center gap-2.5 ${i ? 'mt-1.5 opacity-55' : ''}`}
+          >
+            <Thumb id={e.subsonic_id} seed={e.subsonic_id ?? e.title} />
+            <div className="min-w-0 flex-1">
+              <div className="flex min-w-0 items-baseline gap-2">
+                <span className="truncate text-xs font-bold uppercase leading-4 tracking-wider sm:text-[13px] sm:leading-5">
+                  {e.title || 'Unknown track'}
+                </span>
+                {e.requestedBy && (
+                  <span className="hidden shrink-0 text-[10px] tracking-wider opacity-80 @min-[600px]:inline">
+                    ♥ {e.requestedBy}
+                  </span>
+                )}
+              </div>
+              <div className="truncate text-[11px] leading-4 opacity-80">
+                {e.artist}
+                {e.requestedBy && (
+                  <span className="opacity-80 @min-[600px]:hidden">{e.artist ? ' · ' : ''}♥ {e.requestedBy}</span>
+                )}
+                {e.album && (
+                  <span className="hidden opacity-70 @min-[600px]:inline">{e.artist ? ' · ' : ''}{e.album}</span>
+                )}
+              </div>
             </div>
           </div>
         ))
