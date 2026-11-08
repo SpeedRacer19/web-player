@@ -32,12 +32,14 @@ All notable changes to this player are recorded here. The format follows
   following a long way back. It stops moving if you've asked your system for
   reduced motion.
 - **Hazard button** is wider (50px, from 36px).
-- **The driver's side adapts in three stages** so the gauges are always
-  readable:
-  - **About 1900px and up:** steering wheel with the gauges behind it.
-  - **1400px up to that:** the wheel steps aside and the gauges get the room,
-    rearranged as a cluster (large BPM on top, RPM and TEMP below). At 1400px
-    the BPM gauge is 144px across (it was about 94px inside the wheel).
+- **The driver's side adapts smoothly** so the gauges are always readable:
+  - The gauges keep a readable size (BPM up to 176px, RPM and TEMP now the
+    same size as each other) whether or not the wheel is there.
+  - With room, RPM and TEMP sit either side of BPM. As the space narrows they
+    slide in and down into a cluster below it.
+  - The steering wheel fades out as it's squeezed (fully there from about
+    2200px screens, gone below about 2080px), rather than shrinking until
+    the gauges are unreadable or vanishing all at once.
   - **Below 1400px** (including 1366px laptops; it was 1280px): the sides fold
     away, the stereo takes the width, and the gauges become a readout line
     (below).

@@ -5,7 +5,8 @@
    become a readout line. Use it as the `cockpit:` variant. Keep in step with
    WIDE in Dashboard.tsx. */
 @theme {
-  --breakpoint-cockpit: 1400px;
+  /* rem, like Tailwind's own breakpoints, or the variants sort wrongly. */
+  --breakpoint-cockpit: 87.5rem; /* 1400px */
 }
 
 /* ---------------------------------------------------------------------------
@@ -722,58 +723,95 @@ body {
   }
 }
 
+/* --- Driver's side: gauges + steering wheel ---------------------------------
+   One continuous layout, driven by the column's width (.driver-side is a
+   size container, so 100cqw = the column):
+   - The gauges are sized off the column (--b BPM, --s the two small dials,
+     which match) and stay that size whether or not the wheel is there.
+   - With room, RPM and TEMP sit either side of BPM. As the column narrows
+     they slide in and down (--off, --drop) into a cluster below it.
+   - The wheel is anchored so its opening frames the gauges, and fades out
+     as the column narrows (opacity steps below), since by then the small
+     dials are moving down behind where its spokes would be.
+   - The pod (.binnacle) is recessed into the dash: its top sits just below
+     the dash's top edge (18px above the column), which runs unbroken behind
+     the wheel. Below the cockpit breakpoint the whole side is hidden and the
+     readings move to the head unit's readout line. */
+.driver-side {
+  --wheel: min(calc(100cqw - 16px), 640px);
+  --b: min(54cqw, 176px);
+  --s: calc(var(--b) * 0.68);
+  --pad: 10px;
+  /* Centre-to-centre distance for side-by-side, and what the column allows. */
+  --need: calc(var(--b) / 2 + var(--s) / 2 + 6px);
+  --avail: calc(50cqw - var(--s) / 2 - var(--pad) - 6px);
+  --off: min(var(--need), var(--avail));
+  --drop: clamp(0px, calc((var(--need) - var(--avail)) * 2.4), calc(var(--s) * 0.92));
+  --pod-top: -12px;
+}
+
 /* Crops the wheel at the bottom of the screen without adding page overflow,
    while letting its rim rise above the dash over the windshield. */
 .wheel-clip {
   position: absolute;
-  /* Open to the left: a wheel wider than its column spills that way (off the
-     screen on laptops, onto plain dash on ultra-wide), never into the stereo. */
-  left: -50%;
+  left: 0;
   right: 0;
   bottom: 0;
   top: -40vh;
   overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s,
+    visibility 0.3s;
 }
-/* Steering wheel + the gauge binnacle seen through its upper opening. The rig
-   is a square sized off the driver-side column; its lower quarter is cropped
-   by the bottom of the screen. It's centred in the column when it fits; when
-   it's wider, it shifts left so its right edge stays clear of the stereo.
-   (--wheel-x is the centre, measured in the column; .wheel-clip starts half a
-   column (50cqw) further left, hence the offset.) */
+/* The wheel: centred in the column, its rim's inner edge just above the
+   gauges (so the opening frames them and the hub sits just below BPM); the
+   bottom hangs off the screen. .wheel-clip starts 40vh above the column. */
 .wheel-rig {
   position: absolute;
-  left: calc(50cqw + var(--wheel-x));
-  bottom: 0;
+  left: 50%;
+  top: calc(40vh + var(--pod-top) - 4px - var(--wheel) * 0.07);
   width: var(--wheel);
   aspect-ratio: 1;
-  transform: translate(-50%, 25%);
+  transform: translateX(-50%);
 }
-/* The driver's side has two forms, by how much room it has (a container
-   query on .driver-side):
-   - Under 380px: GAUGES ONLY. No wheel (it would make them too small to
-     read): the cluster gets the whole column, BPM large on top, RPM and TEMP
-     side by side below it.
-   - 380px and up: WHEEL + GAUGES. The cluster is recessed into the dash
-     behind the wheel, sized and placed off the wheel (--wheel, the rig's
-     width) so the gauges show through its upper opening. Its top never rises
-     above the dash's top edge (18px above the column), so on wide screens the
-     dash edge runs unbroken behind the wheel.
-   (Below the cockpit breakpoint the whole side is hidden and the readings
-   move to the head unit's readout line.) */
-.driver-side {
-  --wheel: min(108cqw, 640px);
-  --wheel-x: min(50cqw, calc(100cqw - var(--wheel) / 2 - 8px));
+@container (min-width: 440px) {
+  .wheel-clip {
+    visibility: visible;
+    opacity: 0.2;
+  }
 }
-.wheel-clip {
-  display: none;
+@container (min-width: 460px) {
+  .wheel-clip {
+    opacity: 0.4;
+  }
 }
+@container (min-width: 480px) {
+  .wheel-clip {
+    opacity: 0.6;
+  }
+}
+@container (min-width: 500px) {
+  .wheel-clip {
+    opacity: 0.8;
+  }
+}
+@container (min-width: 520px) {
+  .wheel-clip {
+    opacity: 1;
+  }
+}
+
+/* The gauge pod, recessed into the dash; it grows downward as the small
+   dials drop. */
 .binnacle {
   position: absolute;
   left: 50%;
-  top: -8px;
-  width: 94%;
+  top: var(--pod-top);
+  width: calc(max(var(--b), 2 * var(--off) + var(--s)) + 2 * var(--pad));
+  height: calc(var(--b) + var(--drop) + 2 * var(--pad));
   transform: translateX(-50%);
-  padding: 3% 3% 4%;
   border-radius: 40px 40px 26px 26px;
   background: radial-gradient(ellipse at 50% 30%, #121016, #050407 75%);
   box-shadow:
@@ -781,69 +819,30 @@ body {
     0 -2px 0 rgb(255 255 255 / 0.04);
 }
 .cluster {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-areas:
-    'bpm bpm'
-    'rpm temp';
-  align-items: start;
+  position: absolute;
+  inset: 0;
+}
+.cl-bpm,
+.cl-rpm,
+.cl-temp {
+  position: absolute;
+  translate: -50% 0;
 }
 .cl-bpm {
-  grid-area: bpm;
-  justify-self: center;
-  width: 64%;
+  left: 50%;
+  top: var(--pad);
+  width: var(--b);
 }
 .cl-rpm,
 .cl-temp {
-  width: 84%;
-  /* Tuck the small dials up beside the big one. */
-  margin-top: -24%;
+  top: calc(var(--pad) + var(--b) - var(--s) + var(--drop));
+  width: var(--s);
 }
 .cl-rpm {
-  grid-area: rpm;
-  justify-self: start;
+  left: calc(50% - var(--off));
 }
 .cl-temp {
-  grid-area: temp;
-  justify-self: end;
-}
-@container (min-width: 380px) {
-  .wheel-clip {
-    display: block;
-  }
-  .binnacle {
-    left: var(--wheel-x);
-    width: calc(var(--wheel) * 0.82);
-    height: calc(var(--wheel) * 0.37);
-    /* Where it sat inside the wheel (7% down a rig whose bottom quarter hangs
-       below the column), but no higher than the dash top. */
-    top: max(-18px, calc(100% - var(--wheel) * 0.68));
-    padding: 0;
-    display: flex;
-    align-items: center;
-    border-radius: 46% 46% 14% 14% / 60% 60% 14% 14%;
-  }
-  .cluster {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    gap: 2%;
-  }
-  .cl-rpm,
-  .cl-temp {
-    margin-top: 0;
-    align-self: flex-end;
-  }
-  .cl-rpm {
-    width: 29%;
-  }
-  .cl-bpm {
-    width: 38%;
-  }
-  .cl-temp {
-    width: 25%;
-  }
+  left: calc(50% + var(--off));
 }
 .gauge {
   filter: drop-shadow(0 0 6px color-mix(in srgb, var(--lcd-fg) 18%, transparent));

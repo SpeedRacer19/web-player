@@ -147,8 +147,10 @@ The car skin's wide layout (wheel + gauges, glovebox) uses one custom breakpoint
 `cockpit:` (1400px, `@theme` in `src/index.css`). `WIDE` in `Dashboard.tsx`
 mirrors it for JS; change both together. Below it the gauges' readings show in
 the head unit's readout line instead. Inside the cockpit, `.driver-side` is a
-container: under 380px it shows the gauges alone (grid cluster), from 380px the
-steering wheel with the gauges behind it (`@container` rules in `index.css`).
+size container: gauge sizes and positions are CSS custom properties computed
+from its width (`--b`, `--s`, `--off`, `--drop` in `index.css`), and the wheel
+fades in by `@container` steps from 440px to 520px of column. Use `rem` for any
+new breakpoint: Tailwind v4 mis-sorts custom breakpoints in other units.
 
 ## Deliberate non-goals
 
