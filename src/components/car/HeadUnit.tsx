@@ -2,23 +2,25 @@
 // volume knob on the left, play/pause (the first press is the tune-in gesture)
 // on the right, an amber readout for who's on air, and the faceplate buttons:
 //   SRC  → station directory     BAND → stream format     EQ → equalizer
+//   REQ  → request a song (lit while the DJ is looking for it)
 //   DISP → cycle illumination (cyan / amber, bright / dim)   MUTE → mute
 //   ⏏    → eject: leave for the station's own player (its built-in skins)
 // There is deliberately no seek / skip / next: it's one shared live stream.
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Player } from '@/hooks/usePlayer';
 import type { Equalizer } from '@/hooks/useEqualizer';
 import { useStationFeed } from '@/hooks/useStationFeed';
 import { useStation } from '@/hooks/useStation';
 import { useDirectory } from '@/hooks/useDirectory';
+import { useRequest } from '@/hooks/useRequest';
 import { listenerCount } from '@/lib/format';
 import { formatLabel, type StreamFormat } from '@/lib/streamFormat';
 import { Display } from '@/components/car/Display';
 import { VolumeKnob } from '@/components/car/VolumeKnob';
-import { BandMenu, EjectMenu, EqMenu, StationMenu } from '@/components/car/Menus';
+import { BandMenu, EjectMenu, EqMenu, RequestMenu, StationMenu } from '@/components/car/Menus';
 
-type Menu = 'src' | 'band' | 'eq' | 'eject' | null;
+type Menu = 'src' | 'band' | 'eq' | 'req' | 'eject' | null;
 
 function hostOf(url: string) {
   try {
@@ -96,12 +98,15 @@ function FaceButton({
   onClick,
   pressed,
   expanded,
+  lit,
   title,
 }: {
   label: React.ReactNode;
   onClick: () => void;
   pressed?: boolean;
   expanded?: boolean;
+  /** Backlight on without being pressed (e.g. REQ while a request is out). */
+  lit?: boolean;
   title: string;
 }) {
   return (
@@ -112,8 +117,8 @@ function FaceButton({
       aria-expanded={expanded}
       title={title}
       aria-label={typeof label === 'string' ? undefined : title}
-      data-on={pressed || expanded ? 'true' : undefined}
-      className="hu-btn h-8 min-w-12 flex-1 px-2 text-[10px] font-bold tracking-widest sm:h-7 sm:flex-none sm:text-[11px]"
+      data-on={pressed || expanded || lit ? 'true' : undefined}
+      className="hu-btn h-8 min-w-0 flex-1 px-1 text-[10px] font-bold tracking-wider sm:h-7 sm:min-w-12 sm:flex-none sm:px-2 sm:text-[11px] sm:tracking-widest"
     >
       {label}
     </button>
@@ -138,6 +143,9 @@ export function HeadUnit({
   const [flash, setFlash] = useState<string | null>(null);
   const flashTimer = useRef<number | undefined>(undefined);
   const directory = useDirectory(menu === 'src');
+  // Owned here, not by the REQ menu, so a request keeps going if you close it.
+  const request = useRequest();
+  const requestBusy = request.state.phase === 'submitting' || request.state.phase === 'pending';
 
   // Guards against double-toggling mute across fast pointermove events.
   const mutedRef = useRef(muted);
@@ -156,11 +164,23 @@ export function HeadUnit({
     return () => window.removeEventListener('keydown', onKey);
   }, [menu]);
 
-  function show(text: string) {
+  const show = useCallback((text: string) => {
     setFlash(text);
     window.clearTimeout(flashTimer.current);
     flashTimer.current = window.setTimeout(() => setFlash(null), 1400);
-  }
+  }, []);
+
+  // A request that finishes while the REQ menu is closed reports on the
+  // display; with the menu open, the menu shows the outcome itself.
+  const menuRef = useRef(menu);
+  useEffect(() => {
+    menuRef.current = menu;
+  }, [menu]);
+  const { phase: reqPhase, status: reqStatus } = request.state;
+  useEffect(() => {
+    if (reqPhase !== 'done' || menuRef.current === 'req') return;
+    show(reqStatus === 'resolved' ? 'REQ QUEUED' : reqStatus === 'failed' ? 'REQ NOT FOUND' : 'REQ SENT');
+  }, [reqPhase, reqStatus, show]);
 
   function onVolume(v: number) {
     // Turning the knob up un-mutes, like a real stereo.
@@ -178,6 +198,8 @@ export function HeadUnit({
     setMenu(null);
     if (url.replace(/\/+$/, '') === stationUrl) return;
     setStation(url);
+    // A pending request belongs to the old station; its id means nothing here.
+    request.reset();
     // The new station may not serve the current optional mount; start on MP3.
     // Either call retunes in place if we were playing (this is a click, so
     // the browser still counts it as a user gesture).
@@ -217,6 +239,13 @@ export function HeadUnit({
         info={nowPlaying?.stream}
         current={player.format}
         onSelect={pickFormat}
+        onClose={() => setMenu(null)}
+      />
+    ) : menu === 'req' ? (
+      <RequestMenu
+        request={request.state}
+        onSubmit={request.submit}
+        onReset={request.reset}
         onClose={() => setMenu(null)}
       />
     ) : menu === 'eject' ? (
@@ -276,10 +305,17 @@ export function HeadUnit({
         </div>
         {/* Faceplate buttons, centred under the screen (its grid column on
             wider screens). No skip, no seek — it's a shared live stream. */}
-        <div className="col-span-2 flex min-w-0 gap-1.5 sm:col-span-1 sm:col-start-2 sm:row-start-2 sm:justify-center sm:gap-2">
+        <div className="col-span-2 flex min-w-0 gap-1 sm:col-span-1 sm:col-start-2 sm:row-start-2 sm:justify-center sm:gap-2">
           <FaceButton label="SRC" title="Source — choose a station" expanded={menu === 'src'} onClick={() => toggleMenu('src')} />
           <FaceButton label="BAND" title="Band — stream format" expanded={menu === 'band'} onClick={() => toggleMenu('band')} />
           <FaceButton label="EQ" title="Equalizer presets" expanded={menu === 'eq'} onClick={() => toggleMenu('eq')} />
+          <FaceButton
+            label="REQ"
+            title={requestBusy ? 'Request — the DJ is looking for your song' : 'Request a song'}
+            expanded={menu === 'req'}
+            lit={requestBusy}
+            onClick={() => toggleMenu('req')}
+          />
           <FaceButton label="DISP" title="Display illumination" onClick={() => show(onDisp())} />
           <FaceButton
             label="MUTE"

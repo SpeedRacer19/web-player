@@ -14,7 +14,20 @@ All notable changes to this player are recorded here. The format follows
   branch trigger is gone.
 
 ### Added
+- **REQ** button on the car stereo: ask the DJ for a song, artist or vibe
+  right from the head unit. The display shows the search and the result. A
+  request keeps going if you close the menu, and the button stays lit until
+  it's done. Your name is remembered on this device.
 - This changelog.
+
+### Fixed
+- DISP dim modes now dim everything that lights up: the screen, the DJ
+  readout, knob lights, gauges and needles, button labels (including lit
+  ones), the play icon and the hazard switch. Before, a broken CSS rule left
+  most of these at full brightness and dimmed the gauge needles all the time.
+- On phones, the faceplate buttons no longer push the page sideways (an
+  existing problem at 320px that a seventh button would have made worse).
+- Lint is warning-free.
 
 ## [1.0.0] — 2026-11-08
 
