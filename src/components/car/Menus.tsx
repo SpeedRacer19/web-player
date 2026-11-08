@@ -1,11 +1,14 @@
 // The on-screen menus behind the faceplate buttons, rendered inside the VFD:
-//   SRC  — the public SUB/WAVE station directory; pick one to retune.
+//   SRC  — the public SUB/WAVE station directory; pick one to retune, or type
+//          any station's URL (self-hosted, LAN, localhost).
 //   BAND — the stream format (MP3 / AAC / Opus / FLAC), as the station serves
 //          and this browser decodes them (same rules as the official players).
 //   EQ   — three-band equalizer presets (Web Audio, see useEqualizer).
 //   REQ  — request a song (useRequest); the DJ matches it against the library.
 
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import { normalizeStationUrl } from '@/config';
+import { probeStation } from '@/lib/stationClient';
 import type { DirectoryStation, StreamInfo } from '@/lib/types';
 import {
   FORMAT_OPTIONS,
@@ -123,16 +126,26 @@ export function StationMenu({
   onSelect: (url: string) => void;
   onClose: () => void;
 }) {
+  const [typing, setTyping] = useState(false);
   // Self-hosted stations that aren't in the directory still show, pinned on
   // top: the one playing now, and the build's home station.
   const listed = (url: string) => stations.some((s) => sameStation(s.url, url));
   const isHome = sameStation(current, home);
+
+  if (typing) {
+    return <StationUrlEntry onSelect={onSelect} onBack={() => setTyping(false)} onClose={onClose} />;
+  }
   return (
     <MenuFrame
       title="SRC · STATIONS"
       hint={loading ? 'SCANNING…' : `${stations.length || 1} FOUND`}
       onClose={onClose}
     >
+      <Row
+        onClick={() => setTyping(true)}
+        primary="＋ Enter a station URL"
+        secondary="self-hosted, LAN or any SUB/WAVE address"
+      />
       {!listed(current) && (
         <Row
           active
@@ -152,6 +165,146 @@ export function StationMenu({
           secondary={[s.genre, s.location || s.country].filter(Boolean).join(' · ') || hostOf(s.url)}
         />
       ))}
+    </MenuFrame>
+  );
+}
+
+type UrlCheck =
+  | { phase: 'typing'; problem?: string }
+  | { phase: 'checking'; origin: string }
+  | { phase: 'failed'; origin: string; why: string; blocked?: boolean };
+
+/** SRC → "Enter a station URL". Checks there's a SUB/WAVE station at the
+ *  address before switching, so a typo doesn't leave you on a dead station;
+ *  "Tune anyway" covers a station that's down right now. */
+function StationUrlEntry({
+  onSelect,
+  onBack,
+  onClose,
+}: {
+  onSelect: (url: string) => void;
+  onBack: () => void;
+  onClose: () => void;
+}) {
+  const [text, setText] = useState('');
+  const [check, setCheck] = useState<UrlCheck>({ phase: 'typing' });
+  const input = useRef<HTMLInputElement>(null);
+  const abort = useRef<AbortController | null>(null);
+
+  useEffect(() => () => abort.current?.abort(), []);
+  useEffect(() => {
+    if (check.phase === 'typing') input.current?.focus();
+  }, [check.phase]);
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    const origin = normalizeStationUrl(text);
+    if (!origin) {
+      setCheck({ phase: 'typing', problem: 'That doesn’t look like a web address' });
+      return;
+    }
+    // An https page can't load an http station (except localhost): say so
+    // rather than reporting it as unreachable.
+    const insecure =
+      window.location.protocol === 'https:' &&
+      origin.startsWith('http:') &&
+      !/^http:\/\/(localhost|127\.)/.test(origin);
+    if (insecure) {
+      setCheck({
+        phase: 'failed',
+        origin,
+        why: 'Browsers block http:// stations on an https:// page',
+        blocked: true,
+      });
+      return;
+    }
+    abort.current?.abort();
+    const ctrl = new AbortController();
+    abort.current = ctrl;
+    const timer = window.setTimeout(() => ctrl.abort(), 8000);
+    setCheck({ phase: 'checking', origin });
+    const result = await probeStation(origin, ctrl.signal);
+    window.clearTimeout(timer);
+    if (abort.current !== ctrl) return; // superseded or closed
+    if (result === 'ok') onSelect(origin);
+    else
+      setCheck({
+        phase: 'failed',
+        origin,
+        why: result === 'not-subwave' ? 'No SUB/WAVE station answered there' : 'Couldn’t reach it',
+      });
+  }
+
+  const action = 'lcd-row h-6 px-2 text-[10px] font-bold uppercase tracking-widest sm:text-[11px]';
+  const host = 'origin' in check ? check.origin.replace(/^https?:\/\//, '') : '';
+
+  return (
+    <MenuFrame title="SRC · URL" hint="ANY SUB/WAVE STATION" onClose={onClose} plain>
+      {check.phase === 'typing' ? (
+        <form onSubmit={submit} className="flex h-full flex-col justify-center gap-1.5 sm:gap-2">
+          <div className="flex gap-1.5 sm:gap-2">
+            <input
+              ref={input}
+              value={text}
+              onChange={(e) => {
+                setText(e.target.value);
+                if (check.problem) setCheck({ phase: 'typing' });
+              }}
+              placeholder="radio.example.com"
+              aria-label="Station URL"
+              inputMode="url"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              enterKeyHint="go"
+              maxLength={300}
+              className="h-6 min-w-0 flex-1 rounded-[2px] border border-[color-mix(in_srgb,var(--lcd-fg)_40%,transparent)] bg-transparent px-1.5 text-xs tracking-wide text-[var(--lcd-fg)] outline-none placeholder:text-[var(--lcd-dim)] focus:border-[var(--lcd-fg)] sm:h-7 sm:text-sm"
+            />
+            <button
+              type="submit"
+              disabled={!text.trim()}
+              // Inline: .lcd-row (unlayered CSS) would beat a Tailwind border class.
+              style={{ borderColor: 'color-mix(in srgb, var(--lcd-fg) 45%, transparent)' }}
+              className={`${action} shrink-0 disabled:opacity-35 sm:h-7`}
+            >
+              ▶ Tune
+            </button>
+          </div>
+          <div className="flex h-6 items-center gap-2 text-[10px] tracking-wider sm:text-[11px]">
+            {check.problem ? (
+              <span className="truncate uppercase" role="alert">
+                {check.problem}
+              </span>
+            ) : (
+              <span className="truncate opacity-55">https:// is added for you · /listen links work too</span>
+            )}
+            <button type="button" onClick={onBack} className={`${action} ml-auto shrink-0`}>
+              ◀ List
+            </button>
+          </div>
+        </form>
+      ) : check.phase === 'checking' ? (
+        <div className="flex h-full flex-col items-center justify-center gap-1 text-center" role="status">
+          <div className="blink text-base tracking-[0.25em] sm:text-lg">CHECKING…</div>
+          <div className="max-w-full truncate text-[11px] tracking-wider opacity-60">{host}</div>
+        </div>
+      ) : (
+        <div className="flex h-full flex-col justify-center gap-0.5" role="alert">
+          <div className="text-base font-bold tracking-[0.25em] sm:text-lg">NO STATION</div>
+          <div className="truncate text-xs tracking-wider sm:text-sm">{host}</div>
+          <div className="truncate text-[11px] uppercase tracking-wider opacity-60">{check.why}</div>
+          <div className="mt-1 flex gap-2">
+            <button type="button" onClick={() => setCheck({ phase: 'typing' })} className={action}>
+              ◀ Edit
+            </button>
+            {!check.blocked && (
+              <button type="button" onClick={() => onSelect(check.origin)} className={action}>
+                Tune anyway
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </MenuFrame>
   );
 }

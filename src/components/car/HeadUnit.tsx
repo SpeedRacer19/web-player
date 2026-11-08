@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Player } from '@/hooks/usePlayer';
 import type { Equalizer } from '@/hooks/useEqualizer';
+import { config } from '@/config';
 import { useStationFeed } from '@/hooks/useStationFeed';
 import { useStation } from '@/hooks/useStation';
 import { useDirectory } from '@/hooks/useDirectory';
@@ -262,7 +263,7 @@ export function HeadUnit({
   return (
     <section
       aria-label="Car stereo"
-      className="head-unit relative mx-auto w-full min-w-0 max-w-[760px] rounded-xl px-3 pb-3 pt-2 sm:px-5 sm:pb-4 sm:pt-3"
+      className="head-unit relative mx-auto w-full min-w-0 max-w-[920px] rounded-xl px-3 pb-3 pt-2 sm:px-5 sm:pb-4 sm:pt-3"
     >
       {/* Silkscreen */}
       <div className="mb-2 flex h-4 items-baseline justify-between gap-3 overflow-hidden whitespace-nowrap text-[10px] uppercase leading-4 tracking-[0.3em] text-[var(--chrome)]">
@@ -270,7 +271,8 @@ export function HeadUnit({
         <span className="min-w-0 truncate tracking-widest opacity-60">{hostOf(stationUrl)}</span>
       </div>
 
-      <div className="grid grid-cols-2 items-center gap-x-3 gap-y-3 sm:grid-cols-[auto_1fr_auto] sm:gap-x-5">
+      {/* Equal side columns (the knob's width) keep the display centred. */}
+      <div className="grid grid-cols-2 items-center gap-x-3 gap-y-3 sm:grid-cols-[116px_1fr_116px] sm:gap-x-4 lg:gap-x-5">
         <div className="col-span-2 min-w-0 sm:col-span-1 sm:col-start-2 sm:row-start-1">
           <Display
             playing={playing}
@@ -333,6 +335,11 @@ export function HeadUnit({
             expanded={menu === 'eject'}
             onClick={() => toggleMenu('eject')}
           />
+        </div>
+
+        {/* Model number, silkscreened bottom-left: this build's version. */}
+        <div className="col-span-2 self-end text-[9px] leading-3 tracking-[0.3em] text-[var(--chrome)] opacity-60 sm:col-span-1 sm:col-start-1 sm:row-start-2 sm:pb-1">
+          v{config.version}
         </div>
       </div>
     </section>

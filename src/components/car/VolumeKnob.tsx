@@ -93,7 +93,7 @@ export function VolumeKnob({
   const rotation = START + value * SWEEP;
 
   return (
-    <div className="relative aspect-square w-[104px] sm:w-[124px]">
+    <div className="relative aspect-square w-[104px] sm:w-[116px]">
       {/* Level ring */}
       {Array.from({ length: LEDS }, (_, i) => {
         const t = i / (LEDS - 1);

@@ -98,6 +98,13 @@ the URL at import), and `useStationFeed` resets and restarts its loop on a switc
   (409) / locked (401) are final. Sync uses listener time:
   `now − nowPlaying.timestamp − stream.bufferSeconds + offsetMs`.
 - `useStationFeed` also reports `latencyMs`, the round-trip of the last poll.
+- `useUpNext` lists what the listener will hear next. Same buffer problem as
+  `heardTrack`: while the live edge is ahead of the speakers, the live track
+  leads the list, then `/state.upcoming`.
+- Typed station URLs go through `normalizeStationUrl()` (`config.ts`) and
+  `probeStation()` (`stationClient`) before `setStationUrl()`.
+- `config.version` is `package.json`'s version, injected at build time as
+  `__APP_VERSION__` (`vite.config.ts`). Bump `package.json` to change it.
 - **Render the current song from `heardTrack`, not `nowPlaying.nowPlaying`.**
   The API reports the live edge, but Icecast plays every listener
   `stream.bufferSeconds` (~20s) behind it, so the raw field flips to the next

@@ -164,13 +164,14 @@ src/
     usePlayer        #   the <audio> element: tune-in gesture, play/pause, volume
     useElapsed       #   client-side track clock
     useRequest       #   submit a request + poll its outcome
+    useUpNext        #   what the listener hears next (buffer-aware)
     useSchedule      #   fetch /schedule once
     useMediaSession  #   OS lock-screen metadata + artwork
 
   components/        # ── PRESENTATION — redesign this ──
     car/             #   "Night Drive" skin: Windshield · Dashboard · HeadUnit
                      #   (Display · Menus · VolumeKnob · LyricsScreen).
-                     #   SRC = station directory, BAND = stream format,
+                     #   SRC = station directory or a typed URL, BAND = stream format,
                      #   EQ = Web Audio equalizer, REQ = song request,
                      #   DISP = illumination, ⏏ = station's own player,
                      #   glovebox = synced lyrics
