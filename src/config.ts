@@ -15,6 +15,30 @@
 
 const trimSlash = (u: string) => u.replace(/\/+$/, '');
 
+/** Turn whatever a listener typed into a station origin, or null if it can't
+ *  be one. Adds a scheme when there's none (http:// for localhost and LAN
+ *  addresses, which rarely have certificates; https:// otherwise), and drops a
+ *  pasted path such
+ *  as /listen, /api or /stream.mp3: every SUB/WAVE install serves its routes
+ *  from the root of one hostname. */
+export function normalizeStationUrl(input: string): string | null {
+  const raw = input.trim();
+  if (!raw) return null;
+  const local = /^(localhost|127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/i.test(raw);
+  const withScheme = /^[a-z][a-z\d+.-]*:\/\//i.test(raw)
+    ? raw
+    : `${local ? 'http' : 'https'}://${raw}`;
+  try {
+    const u = new URL(withScheme);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+    if (!u.hostname.includes('.') && u.hostname !== 'localhost' && !u.hostname.startsWith('['))
+      return null;
+    return u.origin;
+  } catch {
+    return null;
+  }
+}
+
 const DEFAULT_STATION_URL = trimSlash(
   import.meta.env.VITE_STATION_URL ?? 'https://www.getsubwave.com',
 );
@@ -62,6 +86,8 @@ export const config = {
     return `${current}/stream.${format}`;
   },
   directoryUrl: DIRECTORY_URL,
+  /** This build's version (package.json), shown on the faceplate. */
+  version: __APP_VERSION__,
   /** How often the live feed (now-playing / state / session) is polled. */
   pollIntervalMs: 5000,
 };

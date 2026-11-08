@@ -1,6 +1,7 @@
 // The head unit's main screen, in a cyan VFD style: status row, cover art,
 // title/artist, the acoustic-tag strip (genre · BPM · key · mood — all
-// optional), and a read-only segmented track clock. Reads the shared feed;
+// optional), what's up next (when the screen is wide enough), and a read-only
+// segmented track clock. Reads the shared feed;
 // takes playback state as props from the head unit.
 //
 // Every row has a fixed height and a fixed line count, so a track change can
@@ -9,6 +10,7 @@
 import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { useStationFeed } from '@/hooks/useStationFeed';
 import { useElapsed } from '@/hooks/useElapsed';
+import { useUpNext } from '@/hooks/useUpNext';
 import { coverUrl } from '@/lib/stationClient';
 import { clock, gradientFor } from '@/lib/format';
 import { formatLabel, type StreamFormat } from '@/lib/streamFormat';
@@ -79,6 +81,33 @@ function Cover({ track, trackKey }: { track: NowPlayingTrack | null; trackKey?: 
         <div className="h-full w-full opacity-70" style={{ background: gradientFor(trackKey) }} />
       )}
       <div className="lcd-cover-tint pointer-events-none absolute inset-0" />
+    </div>
+  );
+}
+
+/** The next track or two, in a column on the right of the screen. Only shown
+ *  once the screen is wide enough (a container query on the body), so phones
+ *  keep the full-width now-playing view. */
+function UpNext() {
+  const next = useUpNext(2);
+  return (
+    <div className="hidden w-[36%] max-w-[240px] shrink-0 flex-col justify-center border-l border-[color-mix(in_srgb,var(--lcd-fg)_25%,transparent)] pl-3 @min-[420px]:flex sm:pl-4">
+      <div className="mb-1 h-4 text-[10px] leading-4 tracking-[0.25em] opacity-55 sm:text-[11px]">NEXT ▸</div>
+      {next.length === 0 ? (
+        <div className="text-[11px] uppercase tracking-wider opacity-55">DJ’s choice</div>
+      ) : (
+        next.map((e, i) => (
+          <div key={`${e.subsonic_id ?? e.title}-${i}`} className={`min-w-0 ${i ? 'mt-1.5 opacity-55' : ''}`}>
+            <div className="truncate text-xs font-bold uppercase leading-4 tracking-wider sm:text-[13px] sm:leading-5">
+              {e.title || 'Unknown track'}
+            </div>
+            <div className="truncate text-[11px] leading-4 opacity-80">
+              {e.artist}
+              {e.requestedBy && <span className="opacity-80">{e.artist ? ' · ' : ''}♥ {e.requestedBy}</span>}
+            </div>
+          </div>
+        ))
+      )}
     </div>
   );
 }
@@ -163,6 +192,7 @@ export function Display({
             ))}
           </div>
         </div>
+        <UpNext />
       </div>
     );
   }
@@ -188,7 +218,7 @@ export function Display({
       </div>
 
       {/* Body (or a momentary flash message over it) */}
-      <div className="relative h-[84px] sm:h-[112px]">
+      <div className="@container relative h-[84px] sm:h-[112px]">
         {body}
         {flash && (
           <div className="absolute inset-0 flex items-center justify-center bg-[var(--lcd-bg)] text-center text-xl font-bold tracking-[0.25em] sm:text-2xl">

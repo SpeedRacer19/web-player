@@ -4,6 +4,29 @@ All notable changes to this player are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] — 2026-11-08
+
+### Added
+- **Up next** on the stereo's display: the next track or two (with who
+  requested it), in a column beside the current song. It accounts for the
+  stream delay, so it shows what *you* will hear next. Shown when the display is
+  wide enough (most laptops and desktops, and tablets in landscape); phones
+  keep the full-width view.
+- **Type any station URL** in SRC ("＋ Enter a station URL"): self-hosted, LAN
+  or localhost. The player checks a SUB/WAVE station answers there before
+  switching ("Tune anyway" if it's just offline), adds the scheme for you, and
+  accepts pasted `/listen` links. It explains when the browser blocks an
+  `http://` station on an `https://` page.
+- The version number, silkscreened bottom-left on the head unit. It comes from
+  `package.json`.
+
+### Changed
+- Bigger, centred display. The head unit is wider, and the knob and play
+  columns are equal widths, so the display sits in the middle of the unit
+  (on the 1440px layout it's 510px wide, up from 394px). On wide screens the
+  stereo is now centred on screen too: the steering-wheel and glovebox sides
+  are equal widths.
+
 ## [1.1.0] — 2026-11-08
 
 ### Changed

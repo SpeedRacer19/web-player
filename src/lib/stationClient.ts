@@ -81,6 +81,24 @@ export async function fetchRequestStatus(requestId: string): Promise<RequestResu
   }
 }
 
+/** Is there a SUB/WAVE station at this origin? Asks its /api/now-playing
+ *  directly (not the current station), so the SRC menu can check a typed URL
+ *  before switching. Never throws. */
+export async function probeStation(
+  origin: string,
+  signal?: AbortSignal,
+): Promise<'ok' | 'not-subwave' | 'unreachable'> {
+  try {
+    const r = await fetch(`${origin}/api/now-playing`, { cache: 'no-store', signal });
+    if (!r.ok) return 'not-subwave';
+    const data: unknown = await r.json();
+    return data && typeof data === 'object' && 'nowPlaying' in data ? 'ok' : 'not-subwave';
+  } catch {
+    // CORS refusal, DNS failure, timeout, mixed content: all look the same here.
+    return 'unreachable';
+  }
+}
+
 /** The public station directory (lives on its own origin, not the station's).
  *  Resolves [] on any failure so the SRC list just shows the current station. */
 export async function fetchDirectory(signal?: AbortSignal): Promise<DirectoryStation[]> {

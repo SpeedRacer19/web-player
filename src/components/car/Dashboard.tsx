@@ -296,9 +296,9 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
       className={`dash relative z-10 ${mode.amber ? 'illum-amber' : ''} ${mode.dim ? 'illum-dim' : ''} px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pt-6 xl:px-0`}
     >
       <div className="relative mx-auto flex items-stretch justify-center">
-        {/* Driver side: binnacle + gauges, steering wheel in front. Wider than
-            the passenger side, as seen from the driver's seat. */}
-        <div className="driver-side relative hidden min-w-0 flex-[1.4] xl:block" aria-hidden>
+        {/* Driver side: binnacle + gauges, steering wheel in front. The same
+            width as the passenger side, so the stereo sits centre screen. */}
+        <div className="driver-side relative hidden min-w-0 flex-1 xl:block" aria-hidden>
           <div className="wheel-clip">
             <div className="wheel-rig">
               <div className="binnacle">
@@ -312,8 +312,8 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
         </div>
 
         {/* Center stack: vents over the head unit. */}
-        <div className="center-stack relative z-10 w-full min-w-0 xl:w-[720px] xl:flex-none xl:px-5">
-          <div className="mx-auto mb-4 hidden max-w-[680px] gap-4 sm:flex" aria-hidden>
+        <div className="center-stack relative z-10 w-full min-w-0 xl:w-[clamp(760px,60vw,960px)] xl:flex-none xl:px-5">
+          <div className="mx-auto mb-4 hidden max-w-[920px] gap-4 sm:flex" aria-hidden>
             <div className="vent h-9 flex-1" />
             <div className="hazard" />
             <div className="vent h-9 flex-1" />
@@ -325,7 +325,7 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
             type="button"
             onClick={() => setGloveOpen((o) => !o)}
             aria-expanded={gloveOpen}
-            className="glovebox-pull mx-auto mt-3 flex h-9 w-full max-w-[680px] items-center justify-center gap-3 xl:hidden"
+            className="glovebox-pull mx-auto mt-3 flex h-9 w-full max-w-[900px] items-center justify-center gap-3 xl:hidden"
           >
             <span className="h-1.5 w-10 rounded-full bg-[#2c2733]" aria-hidden />
             GLOVEBOX · LYRICS
