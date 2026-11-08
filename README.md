@@ -168,7 +168,12 @@ src/
     useMediaSession  #   OS lock-screen metadata + artwork
 
   components/        # ── PRESENTATION — redesign this ──
-    NowPlaying · PlayerBar · OnAir · BoothFeed · Queue · RequestBox · Schedule
+    car/             #   "Night Drive" skin: Windshield · Dashboard · HeadUnit
+                     #   (Display · Menus · VolumeKnob · LyricsScreen).
+                     #   SRC = station directory, BAND = stream format,
+                     #   EQ = Web Audio equalizer, ⏏ = station's own player,
+                     #   glovebox = synced lyrics
+    BoothFeed · Queue · RequestBox · Schedule   # not in the layout yet (glovebox, later)
     ui/              #   Avatar, SignalDot, Panel
 ```
 
@@ -196,8 +201,6 @@ each is a good next exercise, and the endpoint is listed so you know where to
 start:
 
 - **Themes & skins** — `/themes` (token maps) and `ui.skin` on `/state`.
-- **Opus codec upgrade** — probe `canPlayType('audio/ogg; codecs=opus')` and
-  switch to `/stream.opus` when the station enables it (`stream.opusEnabled`).
 - **PWA install** — manifest, icons, offline shell.
 - **Audience analytics** — the fire-and-forget `POST /beacon`.
 - **Community catalogs** — `/personas/community`, `/skills/community`,

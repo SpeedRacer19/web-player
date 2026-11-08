@@ -32,11 +32,20 @@ has `"files": []` and only project references, so a bare `tsc --noEmit` type-che
 
 ## Pointing at a station
 
-`VITE_STATION_URL` (see `.env.example`) is the entire config surface. It defaults
+`VITE_STATION_URL` (see `.env.example`) is the main config surface. It defaults
 to `https://www.getsubwave.com`. `src/config.ts` derives everything from that one
 origin: `${url}/api` (the controller JSON API) and `${url}/stream.mp3` (Icecast
 audio). Cross-origin works out of the box — the controller's CORS and the Icecast
 mount are both `Access-Control-Allow-Origin: *`.
+
+**Runtime switching.** `VITE_STATION_URL` is the *default*. Listeners can switch
+station at runtime (the head unit's SRC list, fed by the public directory at
+`VITE_DIRECTORY_URL`, default `https://www.getsubwave.com/stations.json`).
+`config.stationUrl`/`apiUrl`/`streamUrl` are getters, `setStationUrl()` changes
+them, and `useStation()` exposes it to React. The pick is saved in localStorage
+**keyed to the build's default**, so rebuilding with a new `VITE_STATION_URL`
+discards a stale pick. `stationClient` reads config at call time (never cache
+the URL at import), and `useStationFeed` resets and restarts its loop on a switch.
 
 ## Architecture — the load-bearing idea
 
@@ -73,6 +82,31 @@ mount are both `Access-Control-Allow-Origin: *`.
   (resolved/failed/unknown). The slow LLM matching happens server-side, which is
   why it's poll-based.
 - `useSchedule` fetches `/schedule` once (outside the 5s loop — it rarely changes).
+  It does not refetch on a station switch yet; key it on `useStation()` when the
+  schedule comes back into the layout.
+- `usePlayer` also picks the stream mount (`format`/`setFormat`: MP3, AAC, Opus,
+  FLAC), gated by `lib/streamFormat.ts`: the station must advertise it in
+  `now-playing.stream.*Enabled` and the browser must decode it (Opus/FLAC never
+  on iOS or Firefox, as in the official player). A failing mount falls back to MP3.
+- `useEqualizer` is a 3-band Web Audio EQ on the player's `<audio>`. The graph is
+  built only when a non-flat preset is first picked, and
+  `createMediaElementSource` is permanent, so it lives in `App` next to
+  `usePlayer` and must never be re-created.
+- `useLyrics(songId, enabled)` reads `GET /lyrics/current?songId=` only while
+  something shows lyrics (the glovebox). It re-asks a `pending` answer every 4s
+  (up to ~40s) and backs off on an unreachable station; disabled (403) / gone
+  (409) / locked (401) are final. Sync uses listener time:
+  `now − nowPlaying.timestamp − stream.bufferSeconds + offsetMs`.
+- `useStationFeed` also reports `latencyMs`, the round-trip of the last poll.
+- **Render the current song from `heardTrack`, not `nowPlaying.nowPlaying`.**
+  The API reports the live edge, but Icecast plays every listener
+  `stream.bufferSeconds` (~20s) behind it, so the raw field flips to the next
+  song while the old one is still audible. `heardTrack` holds the previous track
+  until `timestamp + bufferSeconds`. `useElapsed` keyed on it therefore resets
+  when the new song is actually heard.
+- The station's own player (and its built-in skins) is always at
+  `${stationUrl}/listen`. The listener's skin choice is stored on that site, so
+  this player can link there (EJECT) but can't preselect a skin.
 - `useMediaSession` wires OS lock-screen metadata + artwork. **Next/prev/seek are
   intentionally left unwired** — a stray headphone tap must not skip a shared live
   stream. Only play/pause are meaningful.
@@ -80,7 +114,7 @@ mount are both `Access-Control-Allow-Origin: *`.
 ### Public API consumed
 
 `/now-playing` (track + acoustic tags + vitals + DJ + active show/guests + token
-ticker), `/state` (queue/history/DJ log), `/session` (Booth chat feed), `/schedule`
+ticker), `/state` (queue/history/DJ log), `/session` (Booth chat feed), `/lyrics/current`, `/schedule`
 (weekly grid), `POST /request` + `/request/:id`, `/cover/:id` (art proxy),
 `/health`. All unauthenticated. `docs/*-design.md` has the endpoint→feature map.
 
@@ -97,6 +131,5 @@ touching any component. Path alias `@/*` → `src/*` (in `vite.config.ts` +
 ## Deliberate non-goals
 
 Omitted to stay a lean starter (documented in README with their endpoints as
-next exercises): theme/skin engine (`/themes`), Opus codec upgrade
-(`/stream.opus`), PWA manifest, audience beacon (`POST /beacon`), community
-catalogs. Don't add these without a reason — the value here is smallness.
+next exercises): theme/skin engine (`/themes`), PWA manifest, audience beacon
+(`POST /beacon`), community catalogs. Don't add these without a reason — the value here is smallness.

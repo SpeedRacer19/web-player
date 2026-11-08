@@ -14,6 +14,9 @@ export interface NowPlayingTrack {
   year?: number;
   duration?: number;
   subsonic_id?: string;
+  /** Unix seconds when the track started at the live edge. The listener hears
+   *  it `stream.bufferSeconds` later. */
+  timestamp?: number;
   // Acoustic-analysis / tag data merged in by the controller. All optional.
   genre?: string | null;
   bpm?: number | null;
@@ -78,6 +81,8 @@ export interface NowPlayingResponse {
   listeners?: ListenerCount | number;
   streamOnline?: boolean;
   streamBitrate?: number | null;
+  /** MP3-floor details + which optional mounts the station also serves. */
+  stream?: StreamInfo | null;
   /** Cumulative since-boot LLM token total — the token ticker. */
   llmTokens?: number | null;
   timezone?: string;
@@ -178,3 +183,61 @@ export interface RequestResult {
   /** A conversational line from the DJ acknowledging the request. */
   reply?: string;
 }
+
+/** `stream` on `/now-playing`. mount/format/bitrate describe the always-served
+ *  MP3 floor; the *Enabled flags say which optional mounts are also live. */
+export interface StreamInfo {
+  mount?: string;
+  format?: string;
+  bitrate?: number | null;
+  sampleRate?: number | null;
+  channels?: number | null;
+  opusEnabled?: boolean;
+  flacEnabled?: boolean;
+  aacEnabled?: boolean;
+  bufferSeconds?: number | null;
+}
+
+/** An entry in the public station directory (`stations.json`). */
+export interface DirectoryStation {
+  slug: string;
+  name: string;
+  url: string;
+  location?: string;
+  country?: string;
+  operator?: string;
+  genre?: string;
+  description?: string;
+  featured?: boolean;
+}
+
+/** A lyric line. `startMs` is on the played timeline (ms since the track
+ *  started); null on a plain, untimed line. */
+export interface LyricLine {
+  startMs: number | null;
+  text: string;
+}
+
+/** `GET /lyrics/current?songId=`. */
+export interface LyricsPayload {
+  songId: string | null;
+  /** True when lines carry timings. */
+  synced: boolean;
+  /** The station's timing correction: add to elapsed before picking a line. */
+  offsetMs: number;
+  lines: LyricLine[];
+  source?: string | null;
+  /** The station is still looking the track up (LRCLIB) — ask again shortly. */
+  pending?: boolean;
+}
+
+/** How a lyrics read went. Only `unavailable` is worth retrying. */
+export type LyricsResult =
+  | { kind: 'ok'; payload: LyricsPayload }
+  /** The operator has lyrics switched off. */
+  | { kind: 'disabled' }
+  /** The track has left the station's recent-play window. */
+  | { kind: 'gone' }
+  /** A private station wants a password this player doesn't have. */
+  | { kind: 'locked' }
+  | { kind: 'unavailable' };
