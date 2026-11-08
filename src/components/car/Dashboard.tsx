@@ -300,12 +300,14 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
             width as the passenger side, so the stereo sits centre screen.
             Both sides stop at 560px: on ultra-wide screens the extra width is
             plain dash at the outer edges, not an ever-bigger glovebox. */}
-        <div className="driver-side relative hidden min-w-0 max-w-[560px] flex-1 xl:block" aria-hidden>
+        <div className="driver-side @container relative hidden min-w-0 max-w-[560px] flex-1 xl:block" aria-hidden>
+          {/* The gauges are set into the dash; the wheel sits in front of
+              them, and the dash shows through its openings. */}
+          <div className="binnacle">
+            <Cluster active={player.playing} />
+          </div>
           <div className="wheel-clip">
             <div className="wheel-rig">
-              <div className="binnacle">
-                <Cluster active={player.playing} />
-              </div>
               <div className="absolute inset-0">
                 <SteeringWheel />
               </div>

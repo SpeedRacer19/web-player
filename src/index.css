@@ -570,16 +570,27 @@ body {
   position: absolute;
   left: 50%;
   bottom: 0;
-  width: min(118%, 640px);
+  width: var(--wheel);
   aspect-ratio: 1;
   transform: translate(-50%, 25%);
 }
+/* The gauge cluster, recessed into the dash behind the wheel. It's sized and
+   placed off the wheel (--wheel, the rig's width) so the gauges show through
+   the wheel's upper opening, but it's part of the dash: its top never rises
+   above the dash's top edge (18px above the driver-side column), so on wide
+   screens the dash edge runs unbroken behind the wheel. */
+.driver-side {
+  --wheel: min(118cqw, 640px);
+}
 .binnacle {
   position: absolute;
-  left: 9%;
-  right: 9%;
-  top: 7%;
-  height: 37%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(var(--wheel) * 0.82);
+  height: calc(var(--wheel) * 0.37);
+  /* Where it sat inside the wheel (7% down a rig whose bottom quarter hangs
+     below the column), but no higher than the dash top. */
+  top: max(-18px, calc(100% - var(--wheel) * 0.68));
   display: flex;
   align-items: center;
   border-radius: 46% 46% 14% 14% / 60% 60% 14% 14%;

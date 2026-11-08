@@ -18,6 +18,9 @@ All notable changes to this player are recorded here. The format follows
   1000px wide). An outboard air vent fills the space beyond it on wide screens.
 - On ultra-wide screens the cockpit stays together in the middle: each side
   of the dash stops at 560px and the rest is plain dash.
+- The gauges are set into the dash, behind the wheel: on wide screens the top
+  edge of the dash now runs unbroken behind the steering wheel and shows
+  through its opening, instead of being covered by the gauge hood.
 - The steering wheel fades out softly where it runs out of room, instead of
   being cut off in a straight line at the sides (which looked like it was
   tucked behind the stereo).
