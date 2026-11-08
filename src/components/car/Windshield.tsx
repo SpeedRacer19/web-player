@@ -137,6 +137,41 @@ function LeadCar() {
   );
 }
 
+/** The rear-view mirror's picture: what you've just driven past. Behind you
+ *  it's already night (the sunset is ahead), the city sits low on the
+ *  horizon, the lane markings and streetlights run away from you, and a pair
+ *  of headlights follows a long way back. */
+function RearView() {
+  return (
+    <div className="rv">
+      <div className="rv-sky">
+        <div className="rv-stars" />
+        <Skyline layer={NEAR} className="rv-skyline" fill="var(--skyline-near)" windowFill="var(--window-near)" />
+      </div>
+      <div className="rv-ground">
+        <div className="rv-road">
+          <div className="rv-mark edge" style={{ left: '9%' }} />
+          <div className="rv-mark edge" style={{ right: '9%' }} />
+          <div className="rv-mark lane-dash" style={{ left: '36.3%' }} />
+          <div className="rv-mark lane-dash" style={{ right: '36.3%' }} />
+          {Array.from({ length: POLE_COUNT }, (_, i) => (
+            <div
+              key={i}
+              className="rv-pole-track"
+              style={{ '--d': `${(-i * POLE_CYCLE_S) / POLE_COUNT}s` } as React.CSSProperties}
+            >
+              <div className="rv-pole left" />
+              <div className="rv-pole right" />
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="rv-follower" />
+      <div className="rv-glass" />
+    </div>
+  );
+}
+
 const SKYLINE_TILES = 4;
 const POLE_COUNT = 4;
 const POLE_CYCLE_S = 4.8;
@@ -210,7 +245,9 @@ export function Windshield() {
           d="M0 0H100V100H0Z M5 100 L12 12 Q13 5 21 4.4 Q50 2.4 79 4.4 Q87 5 88 12 L95 100 Z"
         />
       </svg>
-      <div className="mirror" />
+      <div className="mirror">
+        <RearView />
+      </div>
     </div>
   );
 }

@@ -199,8 +199,9 @@ function SteeringWheel() {
         <linearGradient id="sw-rim" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="var(--dash-glow)" />
           <stop offset="0.16" stopColor="var(--dash-top)" />
-          <stop offset="0.5" stopColor="#100d14" />
-          <stop offset="1" stopColor="#060408" />
+          {/* Lighter than the dash below it, so the whole rim reads. */}
+          <stop offset="0.5" stopColor="#231d2a" />
+          <stop offset="1" stopColor="#1a1520" />
         </linearGradient>
         <linearGradient id="sw-spoke" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#221d28" />
@@ -223,6 +224,10 @@ function SteeringWheel() {
       {/* rim */}
       <circle cx={C} cy={C} r={R} fill="none" stroke="url(#sw-rim)" strokeWidth={RIM} />
       <circle cx={C} cy={C} r={R - RIM / 2} fill="none" stroke="#000" strokeOpacity="0.55" strokeWidth="1.5" />
+      {/* Edge light: a thin highlight on the outside of the rim and a dark line
+          just beyond it, so the full circle stands off the dash. */}
+      <circle cx={C} cy={C} r={R + RIM / 2 + 1} fill="none" stroke="#000" strokeOpacity="0.6" strokeWidth="2" />
+      <circle cx={C} cy={C} r={R + RIM / 2 - 1} fill="none" stroke="#fff" strokeOpacity="0.09" strokeWidth="1.5" />
     </svg>
   );
 }

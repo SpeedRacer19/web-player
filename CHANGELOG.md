@@ -21,9 +21,17 @@ All notable changes to this player are recorded here. The format follows
 - The gauges are set into the dash, behind the wheel: on wide screens the top
   edge of the dash now runs unbroken behind the steering wheel and shows
   through its opening, instead of being covered by the gauge hood.
-- The steering wheel fades out softly where it runs out of room, instead of
-  being cut off in a straight line at the sides (which looked like it was
-  tucked behind the stereo).
+- **Steering wheel:** the whole rim now reads as a circle (lighter lower rim,
+  a thin edge highlight) instead of only its top arc. It's never cut off at
+  the sides any more: if it's short of room it shifts away from the stereo,
+  so the spill goes off the screen edge or onto plain dash. On laptops it's
+  about 8% smaller, so all three gauges stay on screen.
+- **Rear-view mirror:** larger (up to 300px, from 220px), with a live rear
+  view of what you've passed: night sky behind you, the city on the
+  horizon, lane markings and streetlights running away, and headlights
+  following a long way back. It stops moving if you've asked your system for
+  reduced motion.
+- **Hazard button** is wider (50px, from 36px).
 - Laptop sizes (1280–1440px) are unchanged. At 1920px the steering wheel is a
   little smaller, because the stereo takes more of the width.
 
