@@ -65,8 +65,10 @@ the URL at import), and `useStationFeed` resets and restarts its loop on a switc
 ### Data flow
 
 - **One poll loop for the whole app.** `useStationFeed` (`src/hooks/useStationFeed.tsx`)
-  is a context provider that polls `/now-playing` + `/state` + `/session` together
-  every `config.pollIntervalMs` (5s), via `Promise.all`, and shares one snapshot.
+  is a context provider that polls `/now-playing` + `/state` together every
+  `config.pollIntervalMs` (5s), via `Promise.all`, and shares one snapshot.
+  `/session` (Booth chat) is opt-in with `<StationFeedProvider withSession>`;
+  the car skin doesn't show the booth, so it doesn't poll it.
   Components call `useStationFeed()` to read it — they do **not** open their own
   loops. It **pauses while the tab is hidden** and, on a failed poll, keeps the
   last good snapshot and flips `online` false (the UI degrades to "reconnecting",
@@ -103,6 +105,12 @@ the URL at import), and `useStationFeed` resets and restarts its loop on a switc
   leads the list, then `/state.upcoming`.
 - Typed station URLs go through `normalizeStationUrl()` (`config.ts`) and
   `probeStation()` (`stationClient`) before `setStationUrl()`.
+- **Share links:** `?station=<host or URL>` on the page tunes to that station at
+  load (it beats the remembered pick), is saved like a pick, and is then removed
+  from the address bar. `shareLinkFor()` builds one.
+- **Recent stations:** typed and shared stations go in a recent list (max 5,
+  localStorage, `useRecentStations()`), all in `config.ts`. `useStationFeed`
+  fills in a station's name from `dj.station` when it answers.
 - `config.version` is `package.json`'s version, injected at build time as
   `__APP_VERSION__` (`vite.config.ts`). Bump `package.json` to change it.
 - **Render the current song from `heardTrack`, not `nowPlaying.nowPlaying`.**

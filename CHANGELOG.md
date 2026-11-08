@@ -4,6 +4,31 @@ All notable changes to this player are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] — Unreleased
+
+### Added
+- **Share links.** SRC → "Copy link" copies a link that opens the player tuned
+  to the current station (`?station=radio.example.com`). Opening one switches
+  station, remembers it, and tidies the address bar.
+- **Recent stations.** Stations you type in or open from a link stay in the SRC
+  list (the last 5, under their own names), with ✕ to forget one. Before, a
+  typed station vanished from the list as soon as you switched away.
+- **Up next on mid-size screens** (1280px laptops, tablets): where there isn't
+  room for the NEXT column, a one-line "NEXT ▸ title — artist" takes the album
+  line's place. Phones are unchanged.
+
+### Changed
+- The player no longer polls `/session` (the Booth chat), which nothing in the
+  car skin shows: one request fewer every 5 seconds per listener. A skin that
+  wants it turns it on with `<StationFeedProvider withSession>`.
+- SRC's "Enter URL" and "Copy link" share one compact row, so the station list
+  stays in view.
+
+### Fixed
+- `useStationFeed.tsx` showed as a binary file on GitHub (a literal NUL
+  character in the source, and Windows line endings). It's plain text now; the
+  code behaves the same.
+
 ## [1.2.0] — 2026-11-08
 
 ### Added

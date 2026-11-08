@@ -1,8 +1,12 @@
-// The single live-data heartbeat. One interval polls /now-playing, /state and
-// /session together and shares the result through context, so every component
-// reads the same snapshot instead of each opening its own poll loop.
+// The single live-data heartbeat. One interval polls /now-playing and /state
+// together (plus /session, if asked) and shares the result through context, so
+// every component reads the same snapshot instead of each opening its own poll
+// loop.
 //
 // Behaviour that matters:
+//  - /session (the Booth chat log) is opt-in: <StationFeedProvider withSession>.
+//    Without it `session` stays null, and every listener makes one request
+//    fewer every 5s. Turn it on only if your skin shows the booth.
 //  - Polls every config.pollIntervalMs, immediately on mount.
 //  - Pauses while the tab is hidden (a backgrounded tab shouldn't poll) and
 //    refetches the moment it becomes visible again.
@@ -26,7 +30,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { config } from '@/config';
+import { config, nameStation } from '@/config';
 import { useStation } from '@/hooks/useStation';
 import { fetchNowPlaying, fetchSession, fetchState } from '@/lib/stationClient';
 import type {
@@ -44,7 +48,7 @@ export interface StationFeed {
   ready: boolean;
   /** True while the most recent poll succeeded. */
   online: boolean;
-  /** Round-trip time of the last successful poll (all three reads), in ms. */
+  /** Round-trip time of the last successful poll (all reads), in ms. */
   latencyMs: number | null;
   /** The track the listener is hearing right now — nowPlaying.nowPlaying,
    *  delayed by the stream buffer. Use this to render the current song. */
@@ -69,7 +73,14 @@ const FeedContext = createContext<StationFeed>(EMPTY);
 /** What a poll produces; heardTrack is derived from it in the provider. */
 type Snapshot = Omit<StationFeed, 'heardTrack'>;
 
-export function StationFeedProvider({ children }: { children: ReactNode }) {
+export function StationFeedProvider({
+  children,
+  withSession = false,
+}: {
+  children: ReactNode;
+  /** Also poll /session (the Booth chat log) into `session`. Off by default. */
+  withSession?: boolean;
+}) {
   const [feed, setFeed] = useState<Snapshot>(EMPTY);
   // Keep the latest snapshot in a ref so a failed poll can preserve it without
   // adding `feed` to the effect deps (which would restart the interval).
@@ -91,9 +102,11 @@ export function StationFeedProvider({ children }: { children: ReactNode }) {
         const [nowPlaying, state, session] = await Promise.all([
           fetchNowPlaying(),
           fetchState(),
-          fetchSession(),
+          withSession ? fetchSession() : Promise.resolve(null),
         ]);
         if (cancelled) return;
+        // A typed / shared station gets its real name in the recent list.
+        if (nowPlaying?.dj?.station) nameStation(stationUrl, nowPlaying.dj.station);
         const next: Snapshot = {
           nowPlaying,
           state,
@@ -137,7 +150,7 @@ export function StationFeedProvider({ children }: { children: ReactNode }) {
       stop();
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [stationUrl]);
+  }, [stationUrl, withSession]);
 
   // Hold the previous track until the new one reaches the listener's ears.
   const [heardTrack, setHeardTrack] = useState<NowPlayingTrack | null>(null);

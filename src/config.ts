@@ -12,6 +12,10 @@
 // localStorage, but only against the build's default — rebuild with a new
 // VITE_STATION_URL and the stale pick is ignored, so "it didn't update" can't
 // come from here.
+//
+// A share link (?station=radio.example.com) tunes straight to that station on
+// load and wins over the remembered pick. Stations typed in or opened from a
+// link are kept in a short "recent" list so they can be picked again.
 
 const trimSlash = (u: string) => u.replace(/\/+$/, '');
 
@@ -48,6 +52,35 @@ const DIRECTORY_URL =
   import.meta.env.VITE_DIRECTORY_URL ?? 'https://www.getsubwave.com/stations.json';
 
 const STORAGE_KEY = 'subwave.station.v1';
+const RECENT_KEY = 'subwave.recent.v1';
+const RECENT_MAX = 5;
+
+/** An https:// page can't load an http:// station (browsers block mixed
+ *  content), except on localhost. */
+export function blockedByMixedContent(origin: string): boolean {
+  return (
+    typeof window !== 'undefined' &&
+    window.location.protocol === 'https:' &&
+    origin.startsWith('http:') &&
+    !/^http:\/\/(localhost|127\.)/.test(origin)
+  );
+}
+
+/** ?station= on the page URL, as an origin. The parameter is removed from the
+ *  address bar afterwards, so it doesn't look pinned once you switch. */
+function readShared(): string | null {
+  try {
+    const url = new URL(window.location.href);
+    const raw = url.searchParams.get('station');
+    if (raw === null) return null;
+    url.searchParams.delete('station');
+    window.history.replaceState(window.history.state, '', url);
+    const origin = normalizeStationUrl(raw);
+    return origin && !blockedByMixedContent(origin) ? origin : null;
+  } catch {
+    return null;
+  }
+}
 
 function readStored(): string | null {
   try {
@@ -61,7 +94,90 @@ function readStored(): string | null {
   }
 }
 
-let current = readStored() ?? DEFAULT_STATION_URL;
+function persist(url: string) {
+  try {
+    if (url === DEFAULT_STATION_URL) localStorage.removeItem(STORAGE_KEY);
+    else localStorage.setItem(STORAGE_KEY, JSON.stringify({ url, base: DEFAULT_STATION_URL }));
+  } catch {
+    /* private mode etc. — the switch still applies for this session */
+  }
+}
+
+// --- Recent stations -------------------------------------------------------
+
+export interface RecentStation {
+  url: string;
+  /** The station's own name, filled in once it has answered a poll. */
+  name?: string;
+}
+
+function readRecent(): RecentStation[] {
+  try {
+    const raw: unknown = JSON.parse(localStorage.getItem(RECENT_KEY) ?? '[]');
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .filter((r): r is RecentStation => !!r && typeof r.url === 'string')
+      .map((r) => ({ url: trimSlash(r.url), name: typeof r.name === 'string' ? r.name : undefined }))
+      .slice(0, RECENT_MAX);
+  } catch {
+    return [];
+  }
+}
+
+let recent: readonly RecentStation[] = readRecent();
+const recentSubscribers = new Set<() => void>();
+
+function setRecent(next: RecentStation[]) {
+  recent = next;
+  try {
+    localStorage.setItem(RECENT_KEY, JSON.stringify(next));
+  } catch {
+    /* not remembered across reloads, still listed this session */
+  }
+  recentSubscribers.forEach((fn) => fn());
+}
+
+/** Stations typed in or opened from a share link, newest first. */
+export function getRecentStations(): readonly RecentStation[] {
+  return recent;
+}
+
+/** Put a station at the top of the recent list (the build's own station is
+ *  always reachable, so it's never added). */
+export function rememberStation(url: string) {
+  const u = trimSlash(url);
+  if (u === DEFAULT_STATION_URL) return;
+  const old = recent.find((r) => r.url === u);
+  setRecent([{ url: u, name: old?.name }, ...recent.filter((r) => r.url !== u)].slice(0, RECENT_MAX));
+}
+
+export function forgetStation(url: string) {
+  const u = trimSlash(url);
+  if (recent.some((r) => r.url === u)) setRecent(recent.filter((r) => r.url !== u));
+}
+
+/** Record a recent station's name, in place (no-op if it isn't listed). */
+export function nameStation(url: string, name: string) {
+  const u = trimSlash(url);
+  if (!recent.some((r) => r.url === u && r.name !== name)) return;
+  setRecent(recent.map((r) => (r.url === u ? { ...r, name } : r)));
+}
+
+export function subscribeRecent(fn: () => void) {
+  recentSubscribers.add(fn);
+  return () => {
+    recentSubscribers.delete(fn);
+  };
+}
+
+// --- Current station -------------------------------------------------------
+
+const shared = readShared();
+let current = shared ?? readStored() ?? DEFAULT_STATION_URL;
+if (shared) {
+  persist(shared);
+  rememberStation(shared);
+}
 const subscribers = new Set<() => void>();
 
 export type StreamFormat = 'mp3' | 'aac' | 'opus' | 'flac';
@@ -97,13 +213,18 @@ export function setStationUrl(url: string) {
   const next = trimSlash(url);
   if (next === current) return;
   current = next;
-  try {
-    if (next === DEFAULT_STATION_URL) localStorage.removeItem(STORAGE_KEY);
-    else localStorage.setItem(STORAGE_KEY, JSON.stringify({ url: next, base: DEFAULT_STATION_URL }));
-  } catch {
-    /* private mode etc. — the switch still applies for this session */
-  }
+  persist(next);
   subscribers.forEach((fn) => fn());
+}
+
+/** A link that opens this player tuned to `url`. https:// is left off to keep
+ *  it short (it's the default when the link is opened). */
+export function shareLinkFor(url: string): string {
+  const page = `${window.location.origin}${window.location.pathname}`;
+  const u = trimSlash(url);
+  if (u === DEFAULT_STATION_URL) return page;
+  const value = u.startsWith('https://') ? u.slice('https://'.length) : u;
+  return `${page}?${new URLSearchParams({ station: value })}`;
 }
 
 /** Subscribe to station changes (for useSyncExternalStore). */

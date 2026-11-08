@@ -33,7 +33,9 @@ const { nowPlaying, state, session, ready, online } = useStationFeed();
 - `state` (`StationState | null`): `upcoming: QueueEntry[]`, `history:
   QueueEntry[]`, `djLog: DjLogEntry[]`. A `QueueEntry` has `title`, `artist`,
   `album`, `subsonic_id`, `requestedBy?`, `t?` (ISO time on history).
-- `session` (`SessionPayload | null`): the Booth feed. `session.messages` is an
+- `session` (`SessionPayload | null`): the Booth feed. **Opt-in:** it stays
+  `null` unless `App` mounts `<StationFeedProvider withSession>`, so turn that on
+  if your design shows the booth. `session.messages` is an
   array of `{ t, role, kind, text, meta }` — what the AI DJ said/queued this
   session. `kind` is e.g. `intro | link | request | station-id | weather`.
 

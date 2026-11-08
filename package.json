@@ -1,7 +1,7 @@
 {
   "name": "subwave-web-player",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.3.0",
   "type": "module",
   "description": "A lean, forkable reference web player for a SUB/WAVE internet radio station.",
   "scripts": {
