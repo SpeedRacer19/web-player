@@ -4,7 +4,7 @@ All notable changes to this player are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
-## [1.4.0] — Unreleased
+## [1.4.0] — 2026-11-08
 
 ### Changed
 - **The head unit grows on wide screens, then stops.** It now widens up to
