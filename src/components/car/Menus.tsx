@@ -7,7 +7,7 @@
 //   REQ  — request a song (useRequest); the DJ matches it against the library.
 
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { normalizeStationUrl } from '@/config';
+import { blockedByMixedContent, normalizeStationUrl, type RecentStation } from '@/config';
 import { probeStation } from '@/lib/stationClient';
 import type { DirectoryStation, StreamInfo } from '@/lib/types';
 import {
@@ -108,13 +108,61 @@ function Row({
   );
 }
 
+/** A recent-station row: tune in, or ✕ to forget it. */
+function RecentRow({
+  station,
+  active,
+  onSelect,
+  onForget,
+}: {
+  station: RecentStation;
+  active: boolean;
+  onSelect: () => void;
+  onForget: () => void;
+}) {
+  const host = hostOf(station.url);
+  return (
+    <li className="flex items-stretch gap-1">
+      <button
+        type="button"
+        onClick={onSelect}
+        aria-current={active || undefined}
+        className={`lcd-row flex min-w-0 flex-1 items-center gap-2 px-1.5 py-1 text-left ${active ? 'active' : ''}`}
+      >
+        <span className="w-3 shrink-0 text-center">{active ? '▶' : ''}</span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-xs font-bold uppercase leading-4 tracking-wider sm:text-sm sm:leading-5">
+            {station.name || host}
+          </span>
+          <span className="block truncate text-[10px] leading-4 opacity-60 sm:text-[11px]">
+            recent · {host}
+          </span>
+        </span>
+      </button>
+      <button
+        type="button"
+        onClick={onForget}
+        aria-label={`Forget ${station.name || host}`}
+        title="Forget this station"
+        className="lcd-row shrink-0 px-2 text-xs opacity-60 hover:opacity-100"
+      >
+        ✕
+      </button>
+    </li>
+  );
+}
+
 export function StationMenu({
   stations,
   loading,
   current,
   currentName,
   home,
+  recent,
   onSelect,
+  onTyped,
+  onForget,
+  onCopyLink,
   onClose,
 }: {
   stations: DirectoryStation[];
@@ -123,30 +171,62 @@ export function StationMenu({
   currentName: string;
   /** The station this build points at (VITE_STATION_URL) — always reachable. */
   home: string;
+  /** Typed / shared stations, newest first (useRecentStations). */
+  recent: readonly RecentStation[];
   onSelect: (url: string) => void;
+  /** A station picked by typing its URL (remembered, then selected). */
+  onTyped: (url: string) => void;
+  onForget: (url: string) => void;
+  /** Copy a link that opens this player on the current station. */
+  onCopyLink: () => void;
   onClose: () => void;
 }) {
   const [typing, setTyping] = useState(false);
-  // Self-hosted stations that aren't in the directory still show, pinned on
-  // top: the one playing now, and the build's home station.
+  // Stations that aren't in the directory still show: recent ones (typed or
+  // shared), and pinned on top the one playing now and the build's home.
   const listed = (url: string) => stations.some((s) => sameStation(s.url, url));
   const isHome = sameStation(current, home);
+  const recents = recent.filter((r) => !listed(r.url) && !sameStation(r.url, home));
+  const inRecents = (url: string) => recents.some((r) => sameStation(r.url, url));
 
   if (typing) {
-    return <StationUrlEntry onSelect={onSelect} onBack={() => setTyping(false)} onClose={onClose} />;
+    return <StationUrlEntry onSelect={onTyped} onBack={() => setTyping(false)} onClose={onClose} />;
   }
   return (
     <MenuFrame
       title="SRC · STATIONS"
-      hint={loading ? 'SCANNING…' : `${stations.length || 1} FOUND`}
+      hint={loading ? 'SCANNING…' : `${stations.length + recents.length || 1} FOUND`}
       onClose={onClose}
     >
-      <Row
-        onClick={() => setTyping(true)}
-        primary="＋ Enter a station URL"
-        secondary="self-hosted, LAN or any SUB/WAVE address"
-      />
-      {!listed(current) && (
+      {/* Two actions on one line, so the stations stay in view. */}
+      <li className="mb-0.5 flex gap-1">
+        <button
+          type="button"
+          onClick={() => setTyping(true)}
+          title="Type any SUB/WAVE station's address: self-hosted, LAN or localhost"
+          className="lcd-row min-w-0 flex-1 truncate px-1.5 py-1 text-left text-[11px] font-bold uppercase tracking-wider sm:text-xs"
+        >
+          ＋ Enter URL
+        </button>
+        <button
+          type="button"
+          onClick={onCopyLink}
+          title="Copy a link that opens this player tuned to the current station"
+          className="lcd-row min-w-0 flex-1 truncate px-1.5 py-1 text-left text-[11px] font-bold uppercase tracking-wider sm:text-xs"
+        >
+          ⧉ Copy link
+        </button>
+      </li>
+      {recents.map((r) => (
+        <RecentRow
+          key={r.url}
+          station={r}
+          active={sameStation(r.url, current)}
+          onSelect={() => onSelect(r.url)}
+          onForget={() => onForget(r.url)}
+        />
+      ))}
+      {!listed(current) && !inRecents(current) && (
         <Row
           active
           primary={currentName}
@@ -205,11 +285,7 @@ function StationUrlEntry({
     }
     // An https page can't load an http station (except localhost): say so
     // rather than reporting it as unreachable.
-    const insecure =
-      window.location.protocol === 'https:' &&
-      origin.startsWith('http:') &&
-      !/^http:\/\/(localhost|127\.)/.test(origin);
-    if (insecure) {
+    if (blockedByMixedContent(origin)) {
       setCheck({
         phase: 'failed',
         origin,

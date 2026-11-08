@@ -10,10 +10,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Player } from '@/hooks/usePlayer';
 import type { Equalizer } from '@/hooks/useEqualizer';
-import { config } from '@/config';
+import { config, shareLinkFor } from '@/config';
 import { useStationFeed } from '@/hooks/useStationFeed';
 import { useStation } from '@/hooks/useStation';
 import { useDirectory } from '@/hooks/useDirectory';
+import { useRecentStations } from '@/hooks/useRecentStations';
 import { useRequest } from '@/hooks/useRequest';
 import { listenerCount } from '@/lib/format';
 import { formatLabel, type StreamFormat } from '@/lib/streamFormat';
@@ -144,6 +145,7 @@ export function HeadUnit({
   const [flash, setFlash] = useState<string | null>(null);
   const flashTimer = useRef<number | undefined>(undefined);
   const directory = useDirectory(menu === 'src');
+  const recentStations = useRecentStations();
   // Owned here, not by the REQ menu, so a request keeps going if you close it.
   const request = useRequest();
   const requestBusy = request.state.phase === 'submitting' || request.state.phase === 'pending';
@@ -209,6 +211,18 @@ export function HeadUnit({
     show('SEEK…');
   }
 
+  async function copyLink() {
+    setMenu(null);
+    const link = shareLinkFor(stationUrl);
+    try {
+      await navigator.clipboard.writeText(link);
+      show('LINK COPIED');
+    } catch {
+      // No clipboard access (insecure page, permissions): let them copy it.
+      window.prompt('Copy this link to share the station:', link);
+    }
+  }
+
   function pickFormat(f: StreamFormat) {
     setMenu(null);
     player.setFormat(f);
@@ -232,7 +246,14 @@ export function HeadUnit({
         current={stationUrl}
         currentName={station}
         home={defaultStationUrl}
+        recent={recentStations.recent}
         onSelect={pickStation}
+        onTyped={(url) => {
+          recentStations.remember(url);
+          pickStation(url);
+        }}
+        onForget={recentStations.forget}
+        onCopyLink={copyLink}
         onClose={() => setMenu(null)}
       />
     ) : menu === 'band' ? (

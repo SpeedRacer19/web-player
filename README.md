@@ -135,6 +135,18 @@ From that origin the player derives `${url}/api` (the controller) and
 `${url}/stream.mp3` (the audio). It works cross-origin out of the box — the
 controller's CORS and the Icecast mount are both wide open.
 
+**Without rebuilding**, listeners can switch station from the head unit: SRC →
+"Enter URL" takes any SUB/WAVE address, and SRC → "Copy link" makes a share link
+that opens the player tuned to the current station:
+
+```
+https://your-player.example.com/?station=radio.example.com
+```
+
+Typed and shared stations are kept in SRC's recent list (the last 5, per
+browser). An `https://` page can't play an `http://` station (browsers block
+mixed content), except on localhost.
+
 ## What it shows
 
 | Feature | Source |
@@ -160,7 +172,7 @@ src/
     format.ts        #   pure display helpers (clock, timeAgo, gradients)
 
   hooks/             # ── DATA LAYER — keep this ──
-    useStationFeed   #   one 5s poll of /now-playing + /state + /session, shared via context
+    useStationFeed   #   one 5s poll of /now-playing + /state (+ /session opt-in), shared via context
     usePlayer        #   the <audio> element: tune-in gesture, play/pause, volume
     useElapsed       #   client-side track clock
     useRequest       #   submit a request + poll its outcome
@@ -171,7 +183,7 @@ src/
   components/        # ── PRESENTATION — redesign this ──
     car/             #   "Night Drive" skin: Windshield · Dashboard · HeadUnit
                      #   (Display · Menus · VolumeKnob · LyricsScreen).
-                     #   SRC = station directory or a typed URL, BAND = stream format,
+                     #   SRC = stations: directory, typed URL, recents, share link; BAND = stream format,
                      #   EQ = Web Audio equalizer, REQ = song request,
                      #   DISP = illumination, ⏏ = station's own player,
                      #   glovebox = synced lyrics

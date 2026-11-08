@@ -1,7 +1,8 @@
 // The head unit's main screen, in a cyan VFD style: status row, cover art,
 // title/artist, the acoustic-tag strip (genre · BPM · key · mood — all
-// optional), what's up next (when the screen is wide enough), and a read-only
-// segmented track clock. Reads the shared feed;
+// optional), what's up next (a column on wide screens, one line in place of
+// the album on mid-size ones, e.g. 1280px laptops), and a read-only segmented
+// track clock. Reads the shared feed;
 // takes playback state as props from the head unit.
 //
 // Every row has a fixed height and a fixed line count, so a track change can
@@ -149,6 +150,7 @@ export function Display({
   const bitrate = nowPlaying?.stream?.bitrate ?? nowPlaying?.streamBitrate;
   const tags = track ? tagStrip(track) : [];
   const offAir = ready && !track;
+  const [next] = useUpNext(1);
   const fmt = format === 'mp3' ? (bitrate ? `${bitrate}K` : 'MP3') : formatLabel(format);
 
   let body: ReactNode;
@@ -179,7 +181,20 @@ export function Display({
             text={track?.artist || 'Unknown artist'}
             className="h-5 text-sm leading-5 opacity-90 sm:h-6 sm:text-base sm:leading-6"
           />
-          <Marquee text={sub} className="h-4 text-[11px] leading-4 opacity-55 sm:text-xs" />
+          {/* Mid-size screens (no room for the NEXT column, more than a
+              phone): the album line becomes a one-line "up next". */}
+          <div className={next ? 'block @min-[340px]:hidden @min-[420px]:block' : ''}>
+            <Marquee text={sub} className="h-4 text-[11px] leading-4 opacity-55 sm:text-xs" />
+          </div>
+          {next && (
+            <div className="hidden h-4 gap-1.5 text-[11px] leading-4 sm:text-xs @min-[340px]:flex @min-[420px]:hidden">
+              <span className="shrink-0 opacity-55">NEXT ▸</span>
+              <Marquee
+                text={`${(next.title || 'Unknown track').toUpperCase()}${next.artist ? ` — ${next.artist}` : ''}${next.requestedBy ? ` · ♥ ${next.requestedBy}` : ''}`}
+                className="min-w-0 flex-1 opacity-80"
+              />
+            </div>
+          )}
           {/* One row only: chips that don't fit wrap out of sight. */}
           <div className="mt-1.5 flex h-4 flex-wrap gap-1 overflow-hidden sm:mt-2">
             {tags.map((t) => (

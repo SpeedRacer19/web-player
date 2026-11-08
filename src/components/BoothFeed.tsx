@@ -2,6 +2,9 @@
 // said/queued this session, newest at the bottom. Each turn carries a `kind`
 // (intro / link / request / station-id / weather / …) we surface as a small
 // label so listeners can see *why* the DJ spoke.
+//
+// Needs the feed's opt-in /session poll: mount <StationFeedProvider withSession>
+// in App, or this stays empty.
 
 import { useEffect, useRef } from 'react';
 import { useStationFeed } from '@/hooks/useStationFeed';
