@@ -87,6 +87,32 @@ function OnAirReadout() {
   );
 }
 
+const ENERGY_READOUT: Record<string, string> = { low: 'LO', medium: 'MED', high: 'HI' };
+
+/** Below the cockpit layout the gauges aren't on screen, so their readings
+ *  fold into a second line here, like a trip computer: RPM is the feed's
+ *  latency, BPM the tempo, TEMP the energy (the same as the gauges). */
+function TripReadout() {
+  const { heardTrack: t, latencyMs } = useStationFeed();
+  const bpm = typeof t?.bpm === 'number' ? String(Math.round(t.bpm)) : '---';
+  const parts: { label: string; value: string; title: string }[] = [
+    { label: 'RPM', value: latencyMs != null ? `${latencyMs}ms` : '---', title: 'Feed latency' },
+    { label: 'BPM', value: bpm, title: 'Tempo' },
+    { label: 'TEMP', value: (t?.energy && ENERGY_READOUT[t.energy]) || '---', title: 'Energy' },
+  ];
+  if (t?.musicalKey) parts.push({ label: 'KEY', value: t.musicalKey, title: 'Musical key' });
+  return (
+    <div className="vfd-strip mt-1.5 flex h-6 items-center gap-3 overflow-hidden whitespace-nowrap rounded px-2.5 text-[10px] leading-6 tracking-wider sm:gap-4 sm:text-[11px] cockpit:hidden">
+      {parts.map((p) => (
+        <span key={p.label} className="shrink-0" title={p.title}>
+          <span className="opacity-55">{p.label} </span>
+          {p.value}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function EjectIcon() {
   return (
     <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden className="mx-auto">
@@ -284,7 +310,7 @@ export function HeadUnit({
   return (
     <section
       aria-label="Car stereo"
-      className="head-unit relative mx-auto w-full min-w-0 max-w-[920px] rounded-xl px-3 pb-3 pt-2 sm:px-5 sm:pb-4 sm:pt-3"
+      className="head-unit relative mx-auto w-full min-w-0 max-w-[920px] rounded-xl cockpit:max-w-[1140px] px-3 pb-3 pt-2 sm:px-5 sm:pb-4 sm:pt-3"
     >
       {/* Silkscreen */}
       <div className="mb-2 flex h-4 items-baseline justify-between gap-3 overflow-hidden whitespace-nowrap text-[10px] uppercase leading-4 tracking-[0.3em] text-[var(--chrome)]">
@@ -306,6 +332,7 @@ export function HeadUnit({
             menu={menuNode}
           />
           <OnAirReadout />
+          <TripReadout />
         </div>
 
         <div className="flex flex-col items-center sm:col-start-1 sm:row-start-1">

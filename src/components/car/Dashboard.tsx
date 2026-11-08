@@ -145,7 +145,7 @@ function Cluster({ active }: { active: boolean }) {
   const rpm = active && latencyMs != null ? clamp01(latencyToDial(latencyMs) + (rev ? 0.14 : 0)) : 0;
 
   return (
-    <div className="flex w-full items-center justify-center gap-[2%]">
+    <div className="cluster">
       <svg width="0" height="0" className="absolute">
         <defs>
           <radialGradient id="gauge-face" cx="50%" cy="40%" r="60%">
@@ -155,7 +155,7 @@ function Cluster({ active }: { active: boolean }) {
         </defs>
       </svg>
       <Gauge
-        className="w-[29%] self-end"
+        className="cl-rpm"
         value={rpm}
         labels={['1', '10', '100', '1k']}
         unit="RPM"
@@ -165,7 +165,7 @@ function Cluster({ active }: { active: boolean }) {
         wobble={active ? 'strong' : undefined}
       />
       <Gauge
-        className="w-[38%]"
+        className="cl-bpm"
         value={active && bpm ? bpm / 200 : 0}
         labels={['0', '40', '80', '120', '160', '200']}
         unit="BPM"
@@ -174,7 +174,7 @@ function Cluster({ active }: { active: boolean }) {
         wobble={active && bpm ? 'light' : undefined}
       />
       <Gauge
-        className="w-[25%] self-end"
+        className="cl-temp"
         value={active && temp != null ? temp : 0}
         labels={['C', '', '', 'H']}
         unit="TEMP"
@@ -199,8 +199,9 @@ function SteeringWheel() {
         <linearGradient id="sw-rim" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="var(--dash-glow)" />
           <stop offset="0.16" stopColor="var(--dash-top)" />
-          <stop offset="0.5" stopColor="#100d14" />
-          <stop offset="1" stopColor="#060408" />
+          {/* Lighter than the dash below it, so the whole rim reads. */}
+          <stop offset="0.5" stopColor="#231d2a" />
+          <stop offset="1" stopColor="#1a1520" />
         </linearGradient>
         <linearGradient id="sw-spoke" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#221d28" />
@@ -223,6 +224,10 @@ function SteeringWheel() {
       {/* rim */}
       <circle cx={C} cy={C} r={R} fill="none" stroke="url(#sw-rim)" strokeWidth={RIM} />
       <circle cx={C} cy={C} r={R - RIM / 2} fill="none" stroke="#000" strokeOpacity="0.55" strokeWidth="1.5" />
+      {/* Edge light: a thin highlight on the outside of the rim and a dark line
+          just beyond it, so the full circle stands off the dash. */}
+      <circle cx={C} cy={C} r={R + RIM / 2 + 1} fill="none" stroke="#000" strokeOpacity="0.6" strokeWidth="2" />
+      <circle cx={C} cy={C} r={R + RIM / 2 - 1} fill="none" stroke="#fff" strokeOpacity="0.09" strokeWidth="1.5" />
     </svg>
   );
 }
@@ -247,9 +252,9 @@ function loadDispMode() {
   }
 }
 
-// The wide (xl) layout has a real glovebox; below it, a pull handle + sheet.
+// The wide (cockpit, 1400px+) layout has a real glovebox; below it, a pull handle + sheet.
 // Only one of the two lyrics screens is ever mounted, so lyrics fetch once.
-const WIDE = '(min-width: 1280px)';
+const WIDE = '(min-width: 1400px)'; // keep in step with --breakpoint-cockpit
 function useWide() {
   return useSyncExternalStore(
     (cb) => {
@@ -293,17 +298,21 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
 
   return (
     <div
-      className={`dash relative z-10 ${mode.amber ? 'illum-amber' : ''} ${mode.dim ? 'illum-dim' : ''} px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pt-6 xl:px-0`}
+      className={`dash relative z-10 ${mode.amber ? 'illum-amber' : ''} ${mode.dim ? 'illum-dim' : ''} px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:pt-6 cockpit:px-0`}
     >
       <div className="relative mx-auto flex items-stretch justify-center">
         {/* Driver side: binnacle + gauges, steering wheel in front. The same
-            width as the passenger side, so the stereo sits centre screen. */}
-        <div className="driver-side relative hidden min-w-0 flex-1 xl:block" aria-hidden>
+            width as the passenger side, so the stereo sits centre screen.
+            Both sides stop at 560px: on ultra-wide screens the extra width is
+            plain dash at the outer edges, not an ever-bigger glovebox. */}
+        <div className="driver-side @container relative hidden min-w-0 max-w-[560px] flex-1 cockpit:block" aria-hidden>
+          {/* The gauges are set into the dash; the wheel sits in front of
+              them, and the dash shows through its openings. */}
+          <div className="binnacle">
+            <Cluster active={player.playing} />
+          </div>
           <div className="wheel-clip">
             <div className="wheel-rig">
-              <div className="binnacle">
-                <Cluster active={player.playing} />
-              </div>
               <div className="absolute inset-0">
                 <SteeringWheel />
               </div>
@@ -312,8 +321,8 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
         </div>
 
         {/* Center stack: vents over the head unit. */}
-        <div className="center-stack relative z-10 w-full min-w-0 xl:w-[clamp(760px,60vw,960px)] xl:flex-none xl:px-5">
-          <div className="mx-auto mb-4 hidden max-w-[920px] gap-4 sm:flex" aria-hidden>
+        <div className="center-stack relative z-10 w-full min-w-0 cockpit:w-[clamp(760px,60vw,1180px)] cockpit:flex-none cockpit:px-5">
+          <div className="mx-auto mb-4 hidden max-w-[920px] gap-4 sm:flex cockpit:max-w-[1140px]" aria-hidden>
             <div className="vent h-9 flex-1" />
             <div className="hazard" />
             <div className="vent h-9 flex-1" />
@@ -325,7 +334,7 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
             type="button"
             onClick={() => setGloveOpen((o) => !o)}
             aria-expanded={gloveOpen}
-            className="glovebox-pull mx-auto mt-3 flex h-9 w-full max-w-[900px] items-center justify-center gap-3 xl:hidden"
+            className="glovebox-pull mx-auto mt-3 flex h-9 w-full max-w-[900px] items-center justify-center gap-3 cockpit:hidden"
           >
             <span className="h-1.5 w-10 rounded-full bg-[#2c2733]" aria-hidden />
             GLOVEBOX · LYRICS
@@ -333,9 +342,12 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
           </button>
         </div>
 
-        {/* Passenger side: the glovebox. The lid is hinged at the bottom and
-            drops toward you; the lyrics screen is fitted inside. */}
-        <div className="passenger-side relative hidden min-w-0 flex-1 overflow-hidden xl:block">
+        {/* Passenger side: the glovebox, a fixed size next to the stereo. The
+            lid is hinged at the bottom and drops toward you; the lyrics screen
+            is fitted inside. An outboard vent fills the space beyond it, when
+            there is some. */}
+        <div className="passenger-side @container relative hidden min-w-0 max-w-[560px] flex-1 overflow-hidden cockpit:block">
+          <div className="side-vent hidden @min-[500px]:block" aria-hidden />
           <div className="glovebox" data-open={gloveOpen || undefined}>
             <div className="glovebox-well">
               {gloveOpen && wide && <LyricsScreen onClose={closeGlove} className="h-full w-full" />}
@@ -356,7 +368,7 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
 
       {/* Small screens: the same compartment slides up as a sheet. */}
       {gloveOpen && !wide && (
-        <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center p-3 xl:hidden">
+        <div className="fixed inset-x-0 bottom-0 z-50 flex justify-center p-3 cockpit:hidden">
           <div className="glovebox-well glovebox-sheet h-[min(60dvh,460px)] w-full max-w-[680px]">
             <LyricsScreen onClose={closeGlove} className="h-full w-full" />
           </div>

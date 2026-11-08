@@ -143,6 +143,15 @@ set of CSS custom properties (`--bg`, `--panel`, `--accent`, …) at the top of
 touching any component. Path alias `@/*` → `src/*` (in `vite.config.ts` +
 `tsconfig.app.json`).
 
+The car skin's wide layout (wheel + gauges, glovebox) uses one custom breakpoint,
+`cockpit:` (1400px, `@theme` in `src/index.css`). `WIDE` in `Dashboard.tsx`
+mirrors it for JS; change both together. Below it the gauges' readings show in
+the head unit's readout line instead. Inside the cockpit, `.driver-side` is a
+size container: gauge sizes and positions are CSS custom properties computed
+from its width (`--b`, `--s`, `--off`, `--drop` in `index.css`), and the wheel
+fades in by `@container` steps from 440px to 520px of column. Use `rem` for any
+new breakpoint: Tailwind v4 mis-sorts custom breakpoints in other units.
+
 ## Deliberate non-goals
 
 Omitted to stay a lean starter (documented in README with their endpoints as

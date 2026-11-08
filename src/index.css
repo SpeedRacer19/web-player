@@ -1,5 +1,14 @@
 @import 'tailwindcss';
 
+/* The full cockpit (steering wheel + gauges, stereo, glovebox) from here up;
+   below it the sides fold away, the stereo takes the width and the gauges
+   become a readout line. Use it as the `cockpit:` variant. Keep in step with
+   WIDE in Dashboard.tsx. */
+@theme {
+  /* rem, like Tailwind's own breakpoints, or the variants sort wrongly. */
+  --breakpoint-cockpit: 87.5rem; /* 1400px */
+}
+
 /* ---------------------------------------------------------------------------
    Theme tokens. A redesigner can reskin the whole player by editing these
    custom properties before touching a single component — every component
@@ -464,13 +473,178 @@ body {
   position: absolute;
   left: 50%;
   top: 3%;
-  width: clamp(96px, 20vw, 220px);
+  width: clamp(130px, 24vw, 300px);
   aspect-ratio: 4 / 1;
   transform: translateX(-50%);
   border-radius: 14px / 40%;
   border: 3px solid #050407;
-  background: linear-gradient(to bottom, #1b1324, #4a1d45 60%, #8c3a4c);
+  background: #0a0718;
   box-shadow: 0 6px 18px rgb(0 0 0 / 0.6);
+}
+
+/* --- Rear view (inside the mirror) ------------------------------------------
+   The same scene as the windshield, looking back: night sky, the city low on
+   the horizon, and everything moving AWAY (the road and pole animations run
+   in reverse). Kept dim, like a real mirror at dusk. */
+.rv {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  --rv-horizon: 52%;
+}
+.rv-sky {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: var(--rv-horizon);
+  overflow: hidden;
+  background: linear-gradient(to bottom, #04031a 0%, #120a35 55%, #3a1747 88%, #6a2a55 100%);
+}
+.rv-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 14% 22%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 33% 48%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 52% 16%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 71% 38%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 88% 20%, #fff 50%, transparent 51%);
+  opacity: 0.6;
+}
+.rv-skyline {
+  height: 55%;
+  opacity: 0.85;
+  animation-duration: 140s;
+  animation-direction: reverse;
+}
+.rv-skyline svg {
+  height: 100%;
+}
+.rv-ground {
+  position: absolute;
+  inset: var(--rv-horizon) 0 0 0;
+  background: linear-gradient(to bottom, #1e0c26, var(--ground) 40%);
+  perspective: 70px;
+  perspective-origin: 50% 0%;
+}
+.rv-road {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 170%;
+  height: calc(100% / 0.1392);
+  transform-origin: 50% 100%;
+  transform: translateX(-50%) rotateX(82deg);
+  transform-style: preserve-3d;
+  background: linear-gradient(
+    to right,
+    transparent 0 6%,
+    var(--road-edge) 6% 8%,
+    var(--road) 8% 92%,
+    var(--road-edge) 92% 94%,
+    transparent 94%
+  );
+}
+.rv-mark {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+}
+.rv-mark.edge {
+  width: 0.6%;
+  background: color-mix(in srgb, var(--lane) 55%, transparent);
+}
+.rv-mark.lane-dash {
+  width: 0.8%;
+  background: repeating-linear-gradient(to top, color-mix(in srgb, var(--lane) 80%, transparent) 0 16px, transparent 16px 42px);
+  animation: rv-road-scroll 0.42s linear infinite;
+}
+/* Markings slide toward the horizon: we're driving away from them. */
+@keyframes rv-road-scroll {
+  from {
+    background-position: 0 42px;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+/* Streetlights we've passed: each rides from the near edge back to the
+   horizon (the windshield's pole-travel, reversed) and fades with distance. */
+.rv-pole-track {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  animation: pole-travel 4.8s linear infinite reverse;
+  animation-delay: var(--d, 0s);
+}
+.rv-pole {
+  position: absolute;
+  bottom: 0;
+  width: 3px;
+  height: 90px;
+  transform-origin: 50% 100%;
+  transform: rotateX(-90deg);
+  background: #2a2333;
+  animation: pole-fade 4.8s linear infinite reverse;
+  animation-delay: var(--d, 0s);
+}
+.rv-pole.left {
+  left: 3%;
+}
+.rv-pole.right {
+  right: 3%;
+}
+.rv-pole::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 12px;
+  height: 4px;
+  border-radius: 0 0 50% 50%;
+  background: var(--streetlight);
+  box-shadow: 0 0 10px 3px color-mix(in srgb, var(--streetlight) 60%, transparent);
+}
+.rv-pole.left::after {
+  left: 2px;
+}
+.rv-pole.right::after {
+  right: 2px;
+}
+/* Headlights of a car a long way back, in our lane, drifting a little. */
+.rv-follower {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--rv-horizon) + 6%);
+  width: 7%;
+  height: 7%;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(closest-side, #fffbe8, transparent) 0 0 / 34% 100% no-repeat,
+    radial-gradient(closest-side, #fffbe8, transparent) 100% 0 / 34% 100% no-repeat;
+  opacity: 0.8;
+  filter: drop-shadow(0 0 3px rgb(255 248 220 / 0.8));
+  animation: rv-follow 19s ease-in-out infinite;
+}
+@keyframes rv-follow {
+  0%,
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+  40% {
+    transform: translateX(-38%) scale(1.25) translateY(10%);
+  }
+  70% {
+    transform: translateX(-60%) scale(0.85);
+  }
+}
+/* Glass: a little sheen and a dimmer, so it reads as a reflection. */
+.rv-glass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(160deg, rgb(255 255 255 / 0.1), transparent 35%),
+    linear-gradient(to bottom, rgb(0 0 0 / 0.1), rgb(0 0 0 / 0.25));
 }
 .mirror::before {
   content: '';
@@ -516,7 +690,7 @@ body {
 .hazard {
   position: relative;
   flex: none;
-  width: 36px;
+  width: 50px;
   height: 36px;
   border-radius: 8px;
   background: linear-gradient(to bottom, #2a2531, #151219);
@@ -527,13 +701,13 @@ body {
 .hazard::after {
   content: '';
   position: absolute;
-  inset: 9px;
+  inset: 9px 15px;
   clip-path: polygon(50% 8%, 96% 92%, 4% 92%);
   background: var(--taillight);
   opacity: 0.75;
 }
 
-@media (min-width: 1280px) {
+@media (min-width: 1400px) {
   /* The center stack reads as its own molded panel on wide screens. */
   .center-stack {
     padding-top: 18px;
@@ -549,6 +723,33 @@ body {
   }
 }
 
+/* --- Driver's side: gauges + steering wheel ---------------------------------
+   One continuous layout, driven by the column's width (.driver-side is a
+   size container, so 100cqw = the column):
+   - The gauges are sized off the column (--b BPM, --s the two small dials,
+     which match) and stay that size whether or not the wheel is there.
+   - With room, RPM and TEMP sit either side of BPM. As the column narrows
+     they slide in and down (--off, --drop) into a cluster below it.
+   - The wheel is anchored so its opening frames the gauges, and fades out
+     as the column narrows (opacity steps below), since by then the small
+     dials are moving down behind where its spokes would be.
+   - The pod (.binnacle) is recessed into the dash: its top sits just below
+     the dash's top edge (18px above the column), which runs unbroken behind
+     the wheel. Below the cockpit breakpoint the whole side is hidden and the
+     readings move to the head unit's readout line. */
+.driver-side {
+  --wheel: min(calc(100cqw - 16px), 640px);
+  --b: min(54cqw, 176px);
+  --s: calc(var(--b) * 0.68);
+  --pad: 10px;
+  /* Centre-to-centre distance for side-by-side, and what the column allows. */
+  --need: calc(var(--b) / 2 + var(--s) / 2 + 6px);
+  --avail: calc(50cqw - var(--s) / 2 - var(--pad) - 6px);
+  --off: min(var(--need), var(--avail));
+  --drop: clamp(0px, calc((var(--need) - var(--avail)) * 2.4), calc(var(--s) * 0.92));
+  --pod-top: -12px;
+}
+
 /* Crops the wheel at the bottom of the screen without adding page overflow,
    while letting its rim rise above the dash over the windshield. */
 .wheel-clip {
@@ -558,32 +759,90 @@ body {
   bottom: 0;
   top: -40vh;
   overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s,
+    visibility 0.3s;
 }
-/* Steering wheel + the gauge binnacle seen through its upper opening. The rig
-   is a square sized off the driver-side column (which is wider than the
-   passenger side, as from the driver's seat); its lower quarter is cropped by
-   the bottom of the screen. Its right edge tucks behind the center stack. */
+/* The wheel: centred in the column, its rim's inner edge just above the
+   gauges (so the opening frames them and the hub sits just below BPM); the
+   bottom hangs off the screen. .wheel-clip starts 40vh above the column. */
 .wheel-rig {
   position: absolute;
   left: 50%;
-  bottom: 0;
-  width: min(118%, 640px);
+  top: calc(40vh + var(--pod-top) - 4px - var(--wheel) * 0.07);
+  width: var(--wheel);
   aspect-ratio: 1;
-  transform: translate(-50%, 25%);
+  transform: translateX(-50%);
 }
+@container (min-width: 440px) {
+  .wheel-clip {
+    visibility: visible;
+    opacity: 0.2;
+  }
+}
+@container (min-width: 460px) {
+  .wheel-clip {
+    opacity: 0.4;
+  }
+}
+@container (min-width: 480px) {
+  .wheel-clip {
+    opacity: 0.6;
+  }
+}
+@container (min-width: 500px) {
+  .wheel-clip {
+    opacity: 0.8;
+  }
+}
+@container (min-width: 520px) {
+  .wheel-clip {
+    opacity: 1;
+  }
+}
+
+/* The gauge pod, recessed into the dash; it grows downward as the small
+   dials drop. */
 .binnacle {
   position: absolute;
-  left: 9%;
-  right: 9%;
-  top: 7%;
-  height: 37%;
-  display: flex;
-  align-items: center;
-  border-radius: 46% 46% 14% 14% / 60% 60% 14% 14%;
+  left: 50%;
+  top: var(--pod-top);
+  width: calc(max(var(--b), 2 * var(--off) + var(--s)) + 2 * var(--pad));
+  height: calc(var(--b) + var(--drop) + 2 * var(--pad));
+  transform: translateX(-50%);
+  border-radius: 40px 40px 26px 26px;
   background: radial-gradient(ellipse at 50% 30%, #121016, #050407 75%);
   box-shadow:
     inset 0 10px 18px rgb(0 0 0 / 0.9),
     0 -2px 0 rgb(255 255 255 / 0.04);
+}
+.cluster {
+  position: absolute;
+  inset: 0;
+}
+.cl-bpm,
+.cl-rpm,
+.cl-temp {
+  position: absolute;
+  translate: -50% 0;
+}
+.cl-bpm {
+  left: 50%;
+  top: var(--pad);
+  width: var(--b);
+}
+.cl-rpm,
+.cl-temp {
+  top: calc(var(--pad) + var(--b) - var(--s) + var(--drop));
+  width: var(--s);
+}
+.cl-rpm {
+  left: calc(50% - var(--off));
+}
+.cl-temp {
+  left: calc(50% + var(--off));
 }
 .gauge {
   filter: drop-shadow(0 0 6px color-mix(in srgb, var(--lcd-fg) 18%, transparent));
@@ -644,7 +903,9 @@ body {
 .glovebox {
   position: absolute;
   left: 6%;
-  right: 8%;
+  /* A glovebox is a set size: it grows with the dash up to here, then stays
+     put next to the stereo. */
+  width: min(86%, 400px);
   top: 13%;
   bottom: 17%;
   border-radius: 20px 20px 30px 30px;
@@ -653,6 +914,23 @@ body {
   perspective: 700px;
   perspective-origin: 50% 0%;
 }
+/* Outboard air vent at the passenger end of the dash (wide screens only). */
+.side-vent {
+  position: absolute;
+  right: 7%;
+  top: 22%;
+  width: 54px;
+  height: 46%;
+  border-radius: 14px;
+  background:
+    repeating-linear-gradient(to bottom, #050407 0 5px, #1f1a27 5px 8px),
+    #050407;
+  box-shadow:
+    inset 0 2px 6px rgb(0 0 0 / 0.8),
+    0 0 0 3px #0b0910,
+    0 0 0 4px #24202b;
+}
+
 /* The compartment behind the lid: recessed, with a little courtesy lamp.
    (Positioned only inside the dash glovebox; the small-screen sheet reuses
    the look but sizes itself.) */
@@ -1032,6 +1310,11 @@ body {
   .needle-strong,
   .needle-light,
   .marquee,
+  .rv-skyline,
+  .rv-mark,
+  .rv-pole-track,
+  .rv-pole,
+  .rv-follower,
   .play-btn.beckon {
     animation: none !important;
   }

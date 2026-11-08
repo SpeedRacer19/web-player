@@ -4,6 +4,51 @@ All notable changes to this player are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [1.4.0] — 2026-11-08
+
+### Changed
+- **The head unit grows on wide screens, then stops.** It now widens up to
+  1140px (from 920px), reached at about 1970px. The display gets up to 826px
+  (from 606px).
+- **More detail in up next** once the display is wide enough (about 1640px
+  screens and up): a small cover for each track, the album, who requested it
+  beside the title, and room for full titles.
+- **The glovebox stays a glovebox.** It grows with the dash up to 400px wide
+  and then stays put next to the stereo (on a 3440px screen it used to be over
+  1000px wide). An outboard air vent fills the space beyond it on wide screens.
+- On ultra-wide screens the cockpit stays together in the middle: each side
+  of the dash stops at 560px and the rest is plain dash.
+- The gauges are set into the dash, behind the wheel: on wide screens the top
+  edge of the dash now runs unbroken behind the steering wheel and shows
+  through its opening, instead of being covered by the gauge hood.
+- **Steering wheel:** the whole rim now reads as a circle (lighter lower rim,
+  a thin edge highlight) instead of only its top arc. It's never cut off at
+  the sides any more: if it's short of room it shifts away from the stereo,
+  so the spill goes off the screen edge or onto plain dash. On laptops it's
+  about 8% smaller, so all three gauges stay on screen.
+- **Rear-view mirror:** larger (up to 300px, from 220px), with a live rear
+  view of what you've passed: night sky behind you, the city on the
+  horizon, lane markings and streetlights running away, and headlights
+  following a long way back. It stops moving if you've asked your system for
+  reduced motion.
+- **Hazard button** is wider (50px, from 36px).
+- **The driver's side adapts smoothly** so the gauges are always readable:
+  - The gauges keep a readable size (BPM up to 176px, RPM and TEMP now the
+    same size as each other) whether or not the wheel is there.
+  - With room, RPM and TEMP sit either side of BPM. As the space narrows they
+    slide in and down into a cluster below it.
+  - The steering wheel fades out as it's squeezed (fully there from about
+    2200px screens, gone below about 2080px), rather than shrinking until
+    the gauges are unreadable or vanishing all at once.
+  - **Below 1400px** (including 1366px laptops; it was 1280px): the sides fold
+    away, the stereo takes the width, and the gauges become a readout line
+    (below).
+- **Gauge readout line:** wherever the gauges aren't on screen (below 1400px,
+  phones included), their readings show as a line under the DJ strip, like a
+  trip computer: `RPM 38ms  BPM 91  TEMP MED  KEY Am`.
+- Laptop sizes (1280–1440px) are unchanged. At 1920px the steering wheel is a
+  little smaller, because the stereo takes more of the width.
+
 ## [1.3.0] — 2026-11-08
 
 ### Added
