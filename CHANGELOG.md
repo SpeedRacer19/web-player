@@ -32,10 +32,15 @@ All notable changes to this player are recorded here. The format follows
   following a long way back. It stops moving if you've asked your system for
   reduced motion.
 - **Hazard button** is wider (50px, from 36px).
-- **The full cockpit starts at 1400px** (was 1280px), so the wheel and gauges
-  are never squeezed too small to read. 1440px laptops and up keep it; below
-  1400px (including 1366px laptops) the wheel and glovebox fold away and the
-  stereo takes the width.
+- **The driver's side adapts in three stages** so the gauges are always
+  readable:
+  - **About 1900px and up:** steering wheel with the gauges behind it.
+  - **1400px up to that:** the wheel steps aside and the gauges get the room,
+    rearranged as a cluster (large BPM on top, RPM and TEMP below). At 1400px
+    the BPM gauge is 144px across (it was about 94px inside the wheel).
+  - **Below 1400px** (including 1366px laptops; it was 1280px): the sides fold
+    away, the stereo takes the width, and the gauges become a readout line
+    (below).
 - **Gauge readout line:** wherever the gauges aren't on screen (below 1400px,
   phones included), their readings show as a line under the DJ strip, like a
   trip computer: `RPM 38ms  BPM 91  TEMP MED  KEY Am`.

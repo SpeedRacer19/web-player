@@ -748,31 +748,102 @@ body {
   aspect-ratio: 1;
   transform: translate(-50%, 25%);
 }
-/* The gauge cluster, recessed into the dash behind the wheel. It's sized and
-   placed off the wheel (--wheel, the rig's width) so the gauges show through
-   the wheel's upper opening, but it's part of the dash: its top never rises
-   above the dash's top edge (18px above the driver-side column), so on wide
-   screens the dash edge runs unbroken behind the wheel. */
+/* The driver's side has two forms, by how much room it has (a container
+   query on .driver-side):
+   - Under 380px: GAUGES ONLY. No wheel (it would make them too small to
+     read): the cluster gets the whole column, BPM large on top, RPM and TEMP
+     side by side below it.
+   - 380px and up: WHEEL + GAUGES. The cluster is recessed into the dash
+     behind the wheel, sized and placed off the wheel (--wheel, the rig's
+     width) so the gauges show through its upper opening. Its top never rises
+     above the dash's top edge (18px above the column), so on wide screens the
+     dash edge runs unbroken behind the wheel.
+   (Below the cockpit breakpoint the whole side is hidden and the readings
+   move to the head unit's readout line.) */
 .driver-side {
   --wheel: min(108cqw, 640px);
   --wheel-x: min(50cqw, calc(100cqw - var(--wheel) / 2 - 8px));
 }
+.wheel-clip {
+  display: none;
+}
 .binnacle {
   position: absolute;
-  left: var(--wheel-x);
+  left: 50%;
+  top: -8px;
+  width: 94%;
   transform: translateX(-50%);
-  width: calc(var(--wheel) * 0.82);
-  height: calc(var(--wheel) * 0.37);
-  /* Where it sat inside the wheel (7% down a rig whose bottom quarter hangs
-     below the column), but no higher than the dash top. */
-  top: max(-18px, calc(100% - var(--wheel) * 0.68));
-  display: flex;
-  align-items: center;
-  border-radius: 46% 46% 14% 14% / 60% 60% 14% 14%;
+  padding: 3% 3% 4%;
+  border-radius: 40px 40px 26px 26px;
   background: radial-gradient(ellipse at 50% 30%, #121016, #050407 75%);
   box-shadow:
     inset 0 10px 18px rgb(0 0 0 / 0.9),
     0 -2px 0 rgb(255 255 255 / 0.04);
+}
+.cluster {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    'bpm bpm'
+    'rpm temp';
+  align-items: start;
+}
+.cl-bpm {
+  grid-area: bpm;
+  justify-self: center;
+  width: 64%;
+}
+.cl-rpm,
+.cl-temp {
+  width: 84%;
+  /* Tuck the small dials up beside the big one. */
+  margin-top: -24%;
+}
+.cl-rpm {
+  grid-area: rpm;
+  justify-self: start;
+}
+.cl-temp {
+  grid-area: temp;
+  justify-self: end;
+}
+@container (min-width: 380px) {
+  .wheel-clip {
+    display: block;
+  }
+  .binnacle {
+    left: var(--wheel-x);
+    width: calc(var(--wheel) * 0.82);
+    height: calc(var(--wheel) * 0.37);
+    /* Where it sat inside the wheel (7% down a rig whose bottom quarter hangs
+       below the column), but no higher than the dash top. */
+    top: max(-18px, calc(100% - var(--wheel) * 0.68));
+    padding: 0;
+    display: flex;
+    align-items: center;
+    border-radius: 46% 46% 14% 14% / 60% 60% 14% 14%;
+  }
+  .cluster {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 2%;
+  }
+  .cl-rpm,
+  .cl-temp {
+    margin-top: 0;
+    align-self: flex-end;
+  }
+  .cl-rpm {
+    width: 29%;
+  }
+  .cl-bpm {
+    width: 38%;
+  }
+  .cl-temp {
+    width: 25%;
+  }
 }
 .gauge {
   filter: drop-shadow(0 0 6px color-mix(in srgb, var(--lcd-fg) 18%, transparent));

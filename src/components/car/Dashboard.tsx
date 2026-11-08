@@ -145,7 +145,7 @@ function Cluster({ active }: { active: boolean }) {
   const rpm = active && latencyMs != null ? clamp01(latencyToDial(latencyMs) + (rev ? 0.14 : 0)) : 0;
 
   return (
-    <div className="flex w-full items-center justify-center gap-[2%]">
+    <div className="cluster">
       <svg width="0" height="0" className="absolute">
         <defs>
           <radialGradient id="gauge-face" cx="50%" cy="40%" r="60%">
@@ -155,7 +155,7 @@ function Cluster({ active }: { active: boolean }) {
         </defs>
       </svg>
       <Gauge
-        className="w-[29%] self-end"
+        className="cl-rpm"
         value={rpm}
         labels={['1', '10', '100', '1k']}
         unit="RPM"
@@ -165,7 +165,7 @@ function Cluster({ active }: { active: boolean }) {
         wobble={active ? 'strong' : undefined}
       />
       <Gauge
-        className="w-[38%]"
+        className="cl-bpm"
         value={active && bpm ? bpm / 200 : 0}
         labels={['0', '40', '80', '120', '160', '200']}
         unit="BPM"
@@ -174,7 +174,7 @@ function Cluster({ active }: { active: boolean }) {
         wobble={active && bpm ? 'light' : undefined}
       />
       <Gauge
-        className="w-[25%] self-end"
+        className="cl-temp"
         value={active && temp != null ? temp : 0}
         labels={['C', '', '', 'H']}
         unit="TEMP"
