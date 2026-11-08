@@ -18,6 +18,9 @@ All notable changes to this player are recorded here. The format follows
   1000px wide). An outboard air vent fills the space beyond it on wide screens.
 - On ultra-wide screens the cockpit stays together in the middle: each side
   of the dash stops at 560px and the rest is plain dash.
+- The steering wheel fades out softly where it runs out of room, instead of
+  being cut off in a straight line at the sides (which looked like it was
+  tucked behind the stereo).
 - Laptop sizes (1280–1440px) are unchanged. At 1920px the steering wheel is a
   little smaller, because the stereo takes more of the width.
 

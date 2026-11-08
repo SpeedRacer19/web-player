@@ -558,11 +558,14 @@ body {
   bottom: 0;
   top: -40vh;
   overflow: hidden;
+  /* Soft edges: where the wheel is wider than its side of the dash, the rim
+     fades out instead of being cut off in a straight line. */
+  mask-image: linear-gradient(to right, transparent, #000 56px, #000 calc(100% - 56px), transparent);
 }
 /* Steering wheel + the gauge binnacle seen through its upper opening. The rig
-   is a square sized off the driver-side column (which is wider than the
-   passenger side, as from the driver's seat); its lower quarter is cropped by
-   the bottom of the screen. Its right edge tucks behind the center stack. */
+   is a square sized off the driver-side column; its lower quarter is cropped
+   by the bottom of the screen. It can be a little wider than the column: where
+   it runs out of room it fades out (.wheel-clip's mask), never a hard cut. */
 .wheel-rig {
   position: absolute;
   left: 50%;
