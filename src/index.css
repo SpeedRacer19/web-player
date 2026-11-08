@@ -839,61 +839,26 @@ body {
 .illum-dim .lcd,
 .illum-dim .vfd-strip,
 .illum-dim .knob-led,
-.illum-dim .knob-indicator,
-.illum-dim .gauge,
-.illum-dim /* Idle quiver, layered inside the needle's own rotation. Uneven keyframes so
-   it never looks like a metronome. */
-.needle-strong,
-.needle-light {
-  transform-origin: 50% 50%;
-}
-.needle-strong {
-  animation: needle-strong 1.7s ease-in-out infinite;
-}
-.needle-light {
-  animation: needle-light 3.1s ease-in-out infinite;
-}
-@keyframes needle-strong {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  18% {
-    transform: rotate(3.5deg);
-  }
-  31% {
-    transform: rotate(-1.5deg);
-  }
-  52% {
-    transform: rotate(2deg);
-  }
-  71% {
-    transform: rotate(-3deg);
-  }
-  86% {
-    transform: rotate(1deg);
-  }
-}
-@keyframes needle-light {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  40% {
-    transform: rotate(1.2deg);
-  }
-  75% {
-    transform: rotate(-0.8deg);
-  }
-}
-.gauge-needle span {
+.illum-dim .knob-indicator {
   filter: brightness(0.5);
+}
+/* The needles sit inside .gauge, so this dims them too. */
+.illum-dim .gauge {
+  filter: brightness(0.5) drop-shadow(0 0 6px color-mix(in srgb, var(--lcd-fg) 18%, transparent));
+}
+.illum-dim .hazard::after {
+  opacity: 0.35;
 }
 .illum-dim .play-btn svg {
   filter: brightness(0.5) drop-shadow(0 0 4px var(--lcd-fg));
 }
+/* Backlit labels at half strength, keeping the illumination's tint. */
 .illum-dim .hu-btn {
-  color: color-mix(in srgb, currentColor 55%, #000);
+  color: color-mix(in srgb, color-mix(in srgb, var(--lcd-fg) 62%, #7a7488) 50%, #000);
+  text-shadow: none;
+}
+.illum-dim .hu-btn[data-on='true'] {
+  color: color-mix(in srgb, var(--lcd-fg) 50%, #000);
   text-shadow: none;
 }
 .lcd-dim {

@@ -83,10 +83,7 @@ This is one shared stream, not a personal playlist. The UI must respect that:
    type-check) and `npm run dev`, then look at the player against the live
    station. The default station plays real radio with zero config, so you can
    see cover art, tags, the booth feed, and the schedule populate immediately.
-   Note: a single benign `react-refresh/only-export-components` warning in
-   `src/hooks/useStationFeed.tsx` is pre-existing (the provider and its hook are
-   co-located there on purpose) — don't mistake it for something your redesign
-   broke.
+   Lint should be clean: no errors, no warnings.
 
 ## What not to touch (unless the user asks for new data)
 

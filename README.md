@@ -171,9 +171,10 @@ src/
     car/             #   "Night Drive" skin: Windshield · Dashboard · HeadUnit
                      #   (Display · Menus · VolumeKnob · LyricsScreen).
                      #   SRC = station directory, BAND = stream format,
-                     #   EQ = Web Audio equalizer, ⏏ = station's own player,
+                     #   EQ = Web Audio equalizer, REQ = song request,
+                     #   DISP = illumination, ⏏ = station's own player,
                      #   glovebox = synced lyrics
-    BoothFeed · Queue · RequestBox · Schedule   # not in the layout yet (glovebox, later)
+    BoothFeed · Queue · RequestBox · Schedule   # not in the car layout (REQ replaces RequestBox there)
     ui/              #   Avatar, SignalDot, Panel
 ```
 

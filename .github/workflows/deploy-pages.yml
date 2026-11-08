@@ -7,7 +7,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [car-skin-v1, main]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -31,7 +31,7 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          VITE_STATION_URL: ${{ vars.STATION_URL || 'https://subwave.jaegerculture.com' }}
+          VITE_STATION_URL: ${{ vars.STATION_URL || 'https://www.getsubwave.com' }}
           BASE_PATH: /${{ github.event.repository.name }}/
       - uses: actions/upload-pages-artifact@v3
         with:

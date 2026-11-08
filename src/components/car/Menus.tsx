@@ -3,8 +3,9 @@
 //   BAND — the stream format (MP3 / AAC / Opus / FLAC), as the station serves
 //          and this browser decodes them (same rules as the official players).
 //   EQ   — three-band equalizer presets (Web Audio, see useEqualizer).
+//   REQ  — request a song (useRequest); the DJ matches it against the library.
 
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import type { DirectoryStation, StreamInfo } from '@/lib/types';
 import {
   FORMAT_OPTIONS,
@@ -13,6 +14,7 @@ import {
   type StreamFormat,
 } from '@/lib/streamFormat';
 import type { EqPreset } from '@/hooks/useEqualizer';
+import type { RequestState } from '@/hooks/useRequest';
 
 const sameStation = (a: string, b: string) =>
   a.replace(/\/+$/, '').toLowerCase() === b.replace(/\/+$/, '').toLowerCase();
@@ -29,28 +31,35 @@ function MenuFrame({
   title,
   hint,
   onClose,
+  plain,
   children,
 }: {
   title: string;
   hint?: string;
   onClose: () => void;
+  /** Render the body as-is instead of as a list of rows (forms, messages). */
+  plain?: boolean;
   children: ReactNode;
 }) {
   return (
     <div className="flex h-full flex-col">
       <div className="mb-1.5 flex h-4 items-center gap-3 text-[10px] leading-4 tracking-widest sm:text-[11px]">
-        <span className="font-bold">{title}</span>
+        <span className="shrink-0 whitespace-nowrap font-bold">{title}</span>
         {hint && <span className="truncate opacity-55">{hint}</span>}
         <button
           type="button"
           onClick={onClose}
-          className="ml-auto px-1 hover:opacity-100"
+          className="ml-auto shrink-0 whitespace-nowrap px-1 hover:opacity-100"
           aria-label="Close menu"
         >
           ✕ EXIT
         </button>
       </div>
-      <ul className="lcd-scroll min-h-0 flex-1 overflow-y-auto pr-1">{children}</ul>
+      {plain ? (
+        <div className="min-h-0 flex-1">{children}</div>
+      ) : (
+        <ul className="lcd-scroll min-h-0 flex-1 overflow-y-auto pr-1">{children}</ul>
+      )}
     </div>
   );
 }
@@ -250,6 +259,144 @@ export function EjectMenu({
         aside={<span className="text-xs">↗</span>}
       />
       <Row onClick={onClose} primary="Stay in the car" secondary="back to the road" />
+    </MenuFrame>
+  );
+}
+
+const NAME_KEY = 'subwave.car.reqname.v1';
+
+function loadName() {
+  try {
+    return localStorage.getItem(NAME_KEY) ?? '';
+  } catch {
+    return '';
+  }
+}
+
+/** REQ: ask the DJ for a song. The request itself lives in the head unit
+ *  (useRequest there), so it keeps going if this menu closes; this screen just
+ *  shows where it's at. */
+export function RequestMenu({
+  request,
+  onSubmit,
+  onReset,
+  onClose,
+}: {
+  request: RequestState;
+  onSubmit: (text: string, name: string) => void;
+  onReset: () => void;
+  onClose: () => void;
+}) {
+  const [text, setText] = useState('');
+  const [name, setName] = useState(loadName);
+  const input = useRef<HTMLInputElement>(null);
+  const { phase, status, result, error } = request;
+  const busy = phase === 'submitting' || phase === 'pending';
+
+  // Ready to type as soon as the menu opens (and after "request another").
+  useEffect(() => {
+    if (phase === 'idle') input.current?.focus();
+  }, [phase]);
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    if (busy || !text.trim()) return;
+    try {
+      localStorage.setItem(NAME_KEY, name.trim());
+    } catch {
+      /* private mode: the name just won't be remembered */
+    }
+    onSubmit(text, name);
+  }
+
+  const field =
+    'h-6 min-w-0 rounded-[2px] border border-[color-mix(in_srgb,var(--lcd-fg)_40%,transparent)] bg-transparent px-1.5 text-xs uppercase tracking-wider text-[var(--lcd-fg)] outline-none placeholder:text-[var(--lcd-dim)] focus:border-[var(--lcd-fg)] sm:h-7 sm:text-sm';
+  const action = 'lcd-row px-2 text-[10px] font-bold uppercase tracking-widest sm:text-[11px]';
+
+  let body: ReactNode;
+  if (phase === 'idle') {
+    body = (
+      <form onSubmit={submit} className="flex h-full flex-col justify-center gap-1.5 sm:gap-2">
+        <input
+          ref={input}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Song, artist or a vibe"
+          aria-label="What should the DJ play?"
+          maxLength={200}
+          enterKeyHint="send"
+          className={`${field} w-full`}
+        />
+        <div className="flex gap-1.5 sm:gap-2">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Your name (optional)"
+            aria-label="Your name (optional)"
+            maxLength={40}
+            className={`${field} flex-1`}
+          />
+          <button
+            type="submit"
+            disabled={!text.trim()}
+            // Inline: .lcd-row (unlayered CSS) would beat a Tailwind border class.
+            style={{ borderColor: 'color-mix(in srgb, var(--lcd-fg) 45%, transparent)' }}
+            className={`${action} h-6 shrink-0 disabled:opacity-35 sm:h-7`}
+          >
+            ▶ Send
+          </button>
+        </div>
+      </form>
+    );
+  } else if (busy) {
+    body = (
+      <div className="flex h-full flex-col items-center justify-center gap-1 text-center" role="status">
+        <div className="blink text-base tracking-[0.25em] sm:text-lg">SEARCHING…</div>
+        {text.trim() && (
+          <div className="max-w-full truncate text-[11px] uppercase tracking-wider opacity-60">
+            “{text.trim()}”
+          </div>
+        )}
+      </div>
+    );
+  } else {
+    const track = result?.track;
+    const reply = result?.reply || result?.message;
+    const [headline, detail] =
+      status === 'resolved'
+        ? ['✓ QUEUED', track ? [track.title, track.artist].filter(Boolean).join(' — ') : '']
+        : status === 'failed'
+          ? error === 'network'
+            ? ['NO SIGNAL', 'couldn’t reach the station']
+            : ['NOT FOUND', 'not in this station’s library']
+          : ['STILL WORKING', 'it may turn up on air shortly'];
+    body = (
+      <div className="flex h-full flex-col justify-center gap-0.5" role="status">
+        <div className="text-base font-bold tracking-[0.25em] sm:text-lg">{headline}</div>
+        {detail && <div className="truncate text-xs uppercase tracking-wider sm:text-sm">{detail}</div>}
+        {reply && status !== 'failed' && (
+          <div className="truncate text-[11px] italic opacity-60 sm:text-xs">“{reply}”</div>
+        )}
+        <div className="mt-1 flex gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              // Keep a miss in the box to tweak; clear it after a hit.
+              if (status === 'resolved') setText('');
+              onReset();
+            }}
+            className={`${action} h-6`}
+          >
+            {status === 'resolved' ? 'Request another' : 'Try another'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <MenuFrame title="REQ · SONG" hint="PLAYS FOR EVERYONE" onClose={onClose} plain>
+      {body}
     </MenuFrame>
   );
 }
