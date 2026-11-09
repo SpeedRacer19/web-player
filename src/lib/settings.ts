@@ -5,14 +5,15 @@
 // so new switches arrive switched to their default for existing listeners.
 
 export interface Settings {
-  /** The motorcycle that now and then passes and rides off to the horizon. */
+  /** The motorcycle that now and then passes and rides off to the horizon.
+   *  Off by default while its artwork is still being worked on. */
   motorcycle: boolean;
   /** The occasional shooting star. */
   shootingStars: boolean;
 }
 
 export const DEFAULTS: Settings = {
-  motorcycle: true,
+  motorcycle: false,
   shootingStars: true,
 };
 

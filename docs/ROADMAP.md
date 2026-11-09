@@ -10,7 +10,8 @@ A screen where listeners choose what they see. The store is already in place
 (`src/lib/settings.ts`, `useSettings()`): the dashboard reads and flips its
 switches, and each feature already respects its own.
 
-- Switches that exist today: **motorcycle**, **shooting stars**.
+- Switches that exist today: **motorcycle** (off by default until its
+  artwork is improved), **shooting stars**.
 - Every new optional piece of scenery should arrive with a switch, so the
   dashboard grows with it.
 

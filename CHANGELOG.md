@@ -12,14 +12,14 @@ All notable changes to this player are recorded here. The format follows
   pulsing together.
 - **Shooting stars:** every 8–25 seconds, at random, a faint streak crosses the
   upper sky in under a second.
-- **A passing motorcycle:** every 30–70 seconds a rider comes up beside you
-  from the left or right, leans into the lane and rides off past the car
-  ahead into the haze on the horizon. It's drawn three-quarters from behind
-  (you see the side nearest you, mirrored per lane) and kept in proportion
-  with the car at every distance.
+- **A passing motorcycle (off by default for now):** when switched on, every
+  30–70 seconds a rider comes up beside you from the left or right, leans into
+  the lane and rides off past the car ahead into the haze on the horizon. It's
+  drawn three-quarters from behind and kept in proportion with the car. It
+  ships switched off while its artwork is still being worked on.
 - **Listener settings** (groundwork for a settings dashboard): a small saved
-  store with switches for the motorcycle and for shooting stars, both on by
-  default. Turning one off stops it appearing, in every open tab.
+  store with switches for the motorcycle (default off) and for shooting stars
+  (default on). Turning one off stops it appearing, in every open tab.
 - All of it pauses in a background tab and stays still with reduced motion.
 - `docs/ROADMAP.md`: ideas agreed for 2.0 (settings dashboard, road layouts)
   and items still open.
