@@ -4,17 +4,97 @@
 // to Settings and DEFAULTS; anything missing from storage gets its default,
 // so new switches arrive switched to their default for existing listeners.
 
+/** The scene's time of day. 'auto' follows the listener's clock. */
+export type TimeOfDaySetting = 'auto' | 'dawn' | 'day' | 'dusk' | 'night';
+export const TIME_OF_DAY: readonly TimeOfDaySetting[] = ['auto', 'dawn', 'day', 'dusk', 'night'];
+
+/** The city on the horizon (src/components/car/skylines.tsx). */
+export const SKYLINE_CHOICES = [
+  'default',
+  'guangzhou',
+  'delhi',
+  'kinshasa',
+  'jakarta',
+  'dhaka',
+  'mexicoCity',
+  'seoul',
+  'cairo',
+  'bogota',
+  'newYork',
+  'tokyo',
+  'houston',
+  'bangkok',
+] as const;
+export type SkylineSetting = (typeof SKYLINE_CHOICES)[number];
+
+/** How fast the car drives: steady, or following the song. */
+export const DRIVING_SPEEDS = ['steady', 'bpm', 'energy'] as const;
+export type DrivingSpeedSetting = (typeof DRIVING_SPEEDS)[number];
+
+/** The car driving ahead of us, or none. */
+export const LEAD_CARS = ['coupe', 'pickup', 'classic', 'van', 'off'] as const;
+export type LeadCarSetting = (typeof LEAD_CARS)[number];
+
+/** Is this an IANA time-zone name the browser knows (e.g. 'Asia/Bangkok')? */
+export function isTimeZone(v: unknown): v is string {
+  if (typeof v !== 'string' || !v) return false;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: v });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** The road ahead: one lane, two-way, three lanes (the original) or a motorway. */
+export const ROAD_LAYOUTS = ['single', 'twoWay', 'three', 'motorway'] as const;
+export type RoadLayoutSetting = (typeof ROAD_LAYOUTS)[number];
+
 export interface Settings {
   /** The motorcycle that now and then passes and rides off to the horizon.
    *  Off by default while its artwork is still being worked on. */
   motorcycle: boolean;
-  /** The occasional shooting star. */
+  /** The occasional shooting star (only when stars are out: dusk, night). */
   shootingStars: boolean;
+  /** The scene's palette: dawn, day, dusk (the original look) or night. */
+  timeOfDay: TimeOfDaySetting;
+  /** The city skyline: the generated default, or a real city. */
+  skyline: SkylineSetting;
+  /** How fast the car drives (useDrivingSpeed). */
+  drivingSpeed: DrivingSpeedSetting;
+  /** The car ahead's style, or 'off' for a clear road. */
+  leadCar: LeadCarSetting;
+  /** The clock Auto time of day follows: 'local' (the listener's device),
+   *  'station' (the station's time zone, from its feed), or an IANA zone. */
+  clock: string;
+  /** The road's layout (Windshield ROADS). */
+  roadLayout: RoadLayoutSetting;
 }
 
 export const DEFAULTS: Settings = {
   motorcycle: false,
   shootingStars: true,
+  timeOfDay: 'dusk',
+  skyline: 'default',
+  drivingSpeed: 'steady',
+  leadCar: 'coupe',
+  clock: 'local',
+  roadLayout: 'three',
+};
+
+/** Settings whose valid values aren't a fixed list. */
+const VALID: { [K in keyof Settings]?: (v: unknown) => boolean } = {
+  clock: (v) => v === 'local' || v === 'station' || isTimeZone(v),
+};
+
+/** Allowed values for settings that are a choice, not on/off. A stored value
+ *  outside its list falls back to the default. */
+export const CHOICES: { [K in keyof Settings]?: readonly Settings[K][] } = {
+  timeOfDay: TIME_OF_DAY,
+  skyline: SKYLINE_CHOICES,
+  drivingSpeed: DRIVING_SPEEDS,
+  leadCar: LEAD_CARS,
+  roadLayout: ROAD_LAYOUTS,
 };
 
 const KEY = 'subwave.settings.v1';
@@ -25,7 +105,11 @@ function read(): Settings {
     const stored = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
     const out = { ...DEFAULTS };
     for (const k of Object.keys(DEFAULTS) as (keyof Settings)[]) {
-      if (typeof stored[k] === typeof DEFAULTS[k]) out[k] = stored[k] as Settings[typeof k];
+      const v = stored[k];
+      const allowed = CHOICES[k] as readonly unknown[] | undefined;
+      if (typeof v !== typeof DEFAULTS[k] || (allowed && !allowed.includes(v))) continue;
+      if (VALID[k] && !VALID[k](v)) continue;
+      (out as Record<string, unknown>)[k] = v;
     }
     return out;
   } catch {

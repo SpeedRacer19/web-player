@@ -115,7 +115,42 @@ the URL at import), and `useStationFeed` resets and restarts its loop on a switc
   switches for optional features (`shootingStars` default on; `motorcycle`
   default off while its art is unfinished), read with `useSettings()`. Add a switch to `Settings` + `DEFAULTS` and
   check it where the feature renders; a settings dashboard only has to call
-  `set(key, value)`. New optional scenery should get a switch here.
+  `set(key, value)`. New optional scenery should get a switch here, and a
+  row in `SettingsPanel.tsx` (the SETUP panel, opened by the hazard button
+  above the stereo).
+- **Time of day:** `useTimeOfDay()` resolves the `timeOfDay` setting to
+  dawn / day / dusk / night; 'auto' follows the clock from `useAutoClock()`
+  (the `clock` setting: 'local', 'station' = the feed's `timezone`, or an
+  IANA zone, validated with `isTimeZone()`); `App` puts
+  `scene tod-<mode>` on `<main>`. Dusk is the `:root` palette; `.tod-*` blocks
+  near the end of `index.css` override the scene variables (sky, sun, land,
+  `--stars`, `--windows`, `--lamp-glow`, the mirror's `--rv-*`). Anything
+  derived from the palette (`--dash-glow`) is re-declared on `.scene` so it
+  follows. Keep new scenery colours in variables so every mode can set them.
+- **Skylines:** each city is a FAR and a NEAR 1200-unit SVG tile
+  (`art(fill, windowFill)`), repeated and drifted by the windshield; the
+  mirror uses the NEAR tile. `skylines-kit.tsx` has the helpers (filler,
+  windows, `stepped`/`taper`/`dome`/`onion`/`pagoda`/… path builders) and
+  `layer()` to build a tile from a short spec; `skylines-cities.tsx` holds
+  most cities; `skylines.tsx` has Default, Guangzhou, Delhi and the
+  `SKYLINES` registry. The `skyline` setting (ids in `SKYLINE_CHOICES`)
+  picks one; SETUP labels come from each city's `name`. Fill with the passed colours so time of day applies; draw
+  cities from reference rather than tracing others' artwork.
+- **Driving speed:** `useDrivingSpeed()` turns the `drivingSpeed` setting and
+  the heard track's `bpm` / `energy` into a pace multiple (1 = normal, capped
+  0.5–1.6). The windshield applies it as `playbackRate` on its driving CSS
+  animations (`DRIVE_ANIMATIONS`), easing between values; never change those
+  animations' durations at runtime (that makes them jump).
+- **Road layouts:** the `roadLayout` setting picks one of `ROADS` in
+  `Windshield.tsx`: the asphalt span, markings, streetlight positions, the
+  lanes beside us a motorcycle may use, and an oncoming lane. Positions are %
+  of the road plane; the viewer is always at 50%, mid-lane (lanes are 27.4
+  wide), so layouts move the road, never the viewpoint. Anything placed off
+  centre on the plane stands up at `rotateX(-82deg)` (the plane is tipped
+  82deg), or perspective shears it.
+- **Car ahead:** the `leadCar` setting picks one of `CARS` in `Windshield.tsx`
+  (each an SVG rear view, its aspect and its width on the road plane) or
+  'off'; with no car the motorcycle may use the centre lane.
 - `config.version` is `package.json`'s version, injected at build time as
   `__APP_VERSION__` (`vite.config.ts`). Bump `package.json` to change it.
 - **Render the current song from `heardTrack`, not `nowPlaying.nowPlaying`.**

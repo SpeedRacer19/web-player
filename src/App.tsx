@@ -6,6 +6,7 @@ import { StationFeedProvider, useStationFeed } from '@/hooks/useStationFeed';
 import { usePlayer } from '@/hooks/usePlayer';
 import { useMediaSession } from '@/hooks/useMediaSession';
 import { useEqualizer } from '@/hooks/useEqualizer';
+import { useTimeOfDay } from '@/hooks/useTimeOfDay';
 import { Windshield } from '@/components/car/Windshield';
 import { Dashboard } from '@/components/car/Dashboard';
 
@@ -15,6 +16,8 @@ function PlayerView() {
   // once and must outlive any re-render of the head unit.
   const eq = useEqualizer(player.getAudioElement);
   const { nowPlaying, heardTrack: track } = useStationFeed();
+  // The scene's palette (index.css .tod-*), from SETUP → Time of day.
+  const timeOfDay = useTimeOfDay();
 
   useMediaSession(track, nowPlaying?.dj?.station, player.playing, {
     onPlay: player.tuneIn,
@@ -22,7 +25,7 @@ function PlayerView() {
   });
 
   return (
-    <main className="flex min-h-dvh flex-col bg-[var(--cabin)]">
+    <main className={`scene tod-${timeOfDay} flex min-h-dvh flex-col bg-[var(--cabin)]`}>
       <Windshield />
       <Dashboard player={player} eq={eq} />
     </main>

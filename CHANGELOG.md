@@ -4,6 +4,70 @@ All notable changes to this player are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [2.0.0] — 2026-11-09
+
+### Added
+- **Settings, behind the hazard button** ("use with caution"). Press the
+  hazard switch above the stereo to open SETUP, a display-styled panel over
+  the dash, in the current DISP illumination; the hazards flash while it's
+  open. It starts with the scenery switches (shooting stars, motorcycle) and
+  Reset to defaults; each 2.0 feature adds its own section. Choices are saved
+  on the device. Escape, ✕ EXIT or a click outside closes it.
+- The hazard button now shows on phones too, centred above the stereo.
+- **Time of day** (SETUP → Scenery): Dawn, Day, Dusk (the original look, and
+  the default) or Night, or Auto to follow your clock (dawn 5–8, day 8–17,
+  dusk 17–20, night after 20). Each swaps the scene's palette, and the details
+  follow: a pale sun rising at dawn, a small high sun by day, a moon at night;
+  stars faint at dawn, gone by day, everywhere at night; city windows dark by
+  day and fewer lit at dawn; streetlights off by day. The rear-view mirror
+  shows the sky behind you (still night at dawn and dusk, blue by day), and
+  the dash picks up the sky's colour. Shooting stars only appear when the
+  stars are out.
+- **Skyline** (SETUP → Scenery): the city on the horizon. **Default** is the
+  original generated city (unchanged, pixel for pixel). **Guangzhou** is a new
+  hand-drawn skyline: Canton Tower with its lit lattice, the IFC and CTF
+  Finance Centre towers in the far layer; the Guangzhou Circle, the Haixin
+  Bridge arch, the Opera House and a pagoda in the near layer. It follows the
+  time of day like the default, and the rear-view mirror shows it too.
+  **Delhi**: Qutub Minar and Humayun's Tomb with the newer high-rises behind;
+  India Gate, the Lotus Temple, Jama Masjid and the Red Fort's Lahori Gate in
+  front. Plus **Kinshasa** (Tour de l'Échangeur, Lumumba monument, palms),
+  **Jakarta** (Monas, Istiqlal, Autograph Tower), **Dhaka** (Parliament
+  House, Shaheed Minar, Martyrs' Memorial), **Mexico City** (Popocatépetl,
+  Torre Latinoamericana, the Angel, Bellas Artes), **Seoul** (N Seoul Tower,
+  Lotte World Tower, Namdaemun), **Cairo** (the pyramids, Cairo Tower, the
+  Citadel, feluccas), **Bogotá** (Monserrate, BD Bacatá, Capitolio),
+  **New York** (Empire State, Chrysler, One WTC, Brooklyn Bridge, Liberty),
+  **Tokyo** (Mt Fuji, Skytree, Tokyo Tower, pagoda, torii, Rainbow Bridge)
+  **Houston** (Bank of America Center, Pennzoil Place, San Jacinto
+  Monument, the Astrodome) and **Bangkok** (King Power MahaNakhon, Baiyoke
+  Tower II, the State Tower; Wat Arun, the Grand Palace, a golden chedi, the
+  Rama VIII Bridge). SETUP lists them in a grid.
+- **Driving speed** (SETUP → Drive): **Steady** (the original pace, default),
+  **Song BPM** (the tempo of the song you're hearing sets the pace: 120 BPM is
+  normal, from half speed for slow songs up to 1.6×) or **Song energy** (low
+  0.6×, medium 1×, high 1.45×). Lane markings, streetlights and the skyline
+  drift (and the mirror) all follow, easing to the new pace over a couple of
+  seconds at a song change, with no jumps. Nothing moves with reduced motion.
+- **Car ahead** (SETUP → Drive): **Coupe** (the original, default),
+  **Pickup**, **Classic** (fifties fins and round tail lights) or **Van**, or
+  **Off** for a clear road. With no car ahead, the motorcycle (if switched
+  on) can ride the centre lane too.
+- **Clock for Auto time of day** (SETUP, under Time of day when it's on Auto):
+  **Yours** (your device, the default), **Station** (the station's own time
+  zone, from its feed; yours if it doesn't send one), or **Pick a zone** from
+  the full list. It shows the zone and time in use and what that means
+  ("Station · Asia/Tokyo · 23:15 → NIGHT").
+- **Road layouts** (SETUP → Drive → Road): **Single lane**, **Two-way** (a
+  double yellow centre line, with oncoming cars passing now and then),
+  **Three lanes** (the original, default) or **Motorway** (five lanes). You
+  always drive in the middle of your own lane: the road is laid out around
+  you, so the view's perspective never changes. The car ahead stays in your
+  lane; streetlights stand at the road's edges; the mirror shows the same
+  road; the motorcycle only uses lanes beside you that run your way (on a
+  single lane or two-way road, only your own lane, and only with no car
+  ahead).
+
 ## [1.5.0] — 2026-11-09
 
 ### Added
