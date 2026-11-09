@@ -4,12 +4,13 @@
 // screen inside). On narrow screens only the center stack shows, with a
 // glovebox pull handle under it that opens the same compartment as a sheet.
 
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import type { Player } from '@/hooks/usePlayer';
 import type { Equalizer } from '@/hooks/useEqualizer';
 import { useStationFeed } from '@/hooks/useStationFeed';
 import { HeadUnit } from '@/components/car/HeadUnit';
 import { LyricsScreen } from '@/components/car/LyricsScreen';
+import { SettingsPanel } from '@/components/car/SettingsPanel';
 
 const SWEEP = 240; // degrees of needle travel
 const START = -120;
@@ -269,6 +270,7 @@ function useWide() {
 export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
   const [dispMode, setDispMode] = useState(loadDispMode);
   const [gloveOpen, setGloveOpen] = useState(false);
+  const [setupOpen, setSetupOpen] = useState(false);
   const wide = useWide();
 
   useEffect(() => {
@@ -295,6 +297,7 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
     return DISP_MODES[next].label;
   };
   const closeGlove = () => setGloveOpen(false);
+  const closeSetup = useCallback(() => setSetupOpen(false), []);
 
   return (
     <div
@@ -320,12 +323,22 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
           </div>
         </div>
 
-        {/* Center stack: vents over the head unit. */}
+        {/* Center stack: vents over the head unit, with the hazard switch
+            between them. The hazard opens the settings ("use with caution")
+            and blinks while they're open. On phones it shows alone. */}
         <div className="center-stack relative z-10 w-full min-w-0 cockpit:w-[clamp(760px,60vw,1180px)] cockpit:flex-none cockpit:px-5">
-          <div className="mx-auto mb-4 hidden max-w-[920px] gap-4 sm:flex cockpit:max-w-[1140px]" aria-hidden>
-            <div className="vent h-9 flex-1" />
-            <div className="hazard" />
-            <div className="vent h-9 flex-1" />
+          <div className="mx-auto mb-3 flex max-w-[920px] justify-center gap-4 sm:mb-4 cockpit:max-w-[1140px]">
+            <div className="vent hidden h-9 flex-1 sm:block" aria-hidden />
+            <button
+              type="button"
+              className="hazard"
+              onClick={() => setSetupOpen((o) => !o)}
+              aria-expanded={setupOpen}
+              aria-haspopup="dialog"
+              aria-label="Settings"
+              title="Settings — use with caution"
+            />
+            <div className="vent hidden h-9 flex-1 sm:block" aria-hidden />
           </div>
           <HeadUnit player={player} eq={eq} onDisp={cycleDisp} />
 
@@ -365,6 +378,8 @@ export function Dashboard({ player, eq }: { player: Player; eq: Equalizer }) {
           </div>
         </div>
       </div>
+
+      {setupOpen && <SettingsPanel onClose={closeSetup} />}
 
       {/* Small screens: the same compartment slides up as a sheet. */}
       {gloveOpen && !wide && (

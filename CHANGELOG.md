@@ -4,6 +4,17 @@ All notable changes to this player are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [2.0.0] — Unreleased
+
+### Added
+- **Settings, behind the hazard button** ("use with caution"). Press the
+  hazard switch above the stereo to open SETUP, a display-styled panel over
+  the dash, in the current DISP illumination; the hazards flash while it's
+  open. It starts with the scenery switches (shooting stars, motorcycle) and
+  Reset to defaults; each 2.0 feature adds its own section. Choices are saved
+  on the device. Escape, ✕ EXIT or a click outside closes it.
+- The hazard button now shows on phones too, centred above the stereo.
+
 ## [1.5.0] — 2026-11-09
 
 ### Added

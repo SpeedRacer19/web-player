@@ -849,6 +849,19 @@ body {
     inset 0 1px 0 rgb(255 255 255 / 0.08),
     0 2px 0 #000;
 }
+.hazard {
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+}
+.hazard:active {
+  transform: translateY(2px);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+}
+.hazard:focus-visible {
+  outline: 2px solid var(--lcd-fg);
+  outline-offset: 3px;
+}
 .hazard::after {
   content: '';
   position: absolute;
@@ -856,6 +869,27 @@ body {
   clip-path: polygon(50% 8%, 96% 92%, 4% 92%);
   background: var(--taillight);
   opacity: 0.75;
+}
+/* Settings open: the hazards flash, like the real thing. */
+.hazard[aria-expanded='true']::after {
+  animation: hazard-flash 0.9s steps(1) infinite;
+  filter: drop-shadow(0 0 6px var(--taillight));
+}
+@keyframes hazard-flash {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+/* The same triangle, as the settings panel's badge. */
+.hazard-mark {
+  width: 14px;
+  height: 12px;
+  flex: none;
+  clip-path: polygon(50% 8%, 96% 92%, 4% 92%);
+  background: var(--taillight);
 }
 
 @media (min-width: 1400px) {
@@ -1456,6 +1490,7 @@ body {
   .bike-track,
   .bike,
   .bike-lean,
+  .hazard[aria-expanded='true']::after,
   .skyline,
   .skyline .win,
   .road-mark,

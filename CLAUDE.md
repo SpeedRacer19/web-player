@@ -115,7 +115,9 @@ the URL at import), and `useStationFeed` resets and restarts its loop on a switc
   switches for optional features (`shootingStars` default on; `motorcycle`
   default off while its art is unfinished), read with `useSettings()`. Add a switch to `Settings` + `DEFAULTS` and
   check it where the feature renders; a settings dashboard only has to call
-  `set(key, value)`. New optional scenery should get a switch here.
+  `set(key, value)`. New optional scenery should get a switch here, and a
+  row in `SettingsPanel.tsx` (the SETUP panel, opened by the hazard button
+  above the stereo).
 - `config.version` is `package.json`'s version, injected at build time as
   `__APP_VERSION__` (`vite.config.ts`). Bump `package.json` to change it.
 - **Render the current song from `heardTrack`, not `nowPlaying.nowPlaying`.**

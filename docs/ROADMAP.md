@@ -5,10 +5,12 @@ records what actually shipped.
 
 ## 2.0 — make it yours
 
-### Settings dashboard
-A screen where listeners choose what they see. The store is already in place
-(`src/lib/settings.ts`, `useSettings()`): the dashboard reads and flips its
-switches, and each feature already respects its own.
+### Settings dashboard (in progress)
+A screen where listeners choose what they see, opened from the **hazard
+button** ("use with caution"): `src/components/car/SettingsPanel.tsx`, over
+the store in `src/lib/settings.ts` / `useSettings()`. Each feature respects
+its own switch; adding a feature means a key in `Settings` + `DEFAULTS` and a
+row in the panel.
 
 - Switches that exist today: **motorcycle** (off by default until its
   artwork is improved), **shooting stars**.
