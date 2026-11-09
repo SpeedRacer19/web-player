@@ -43,6 +43,12 @@ All notable changes to this player are recorded here. The format follows
   Monument, the Astrodome) and **Bangkok** (King Power MahaNakhon, Baiyoke
   Tower II, the State Tower; Wat Arun, the Grand Palace, a golden chedi, the
   Rama VIII Bridge). SETUP lists them in a grid.
+- **Driving speed** (SETUP → Drive): **Steady** (the original pace, default),
+  **Song BPM** (the tempo of the song you're hearing sets the pace: 120 BPM is
+  normal, from half speed for slow songs up to 1.6×) or **Song energy** (low
+  0.6×, medium 1×, high 1.45×). Lane markings, streetlights and the skyline
+  drift (and the mirror) all follow, easing to the new pace over a couple of
+  seconds at a song change, with no jumps. Nothing moves with reduced motion.
 
 ## [1.5.0] — 2026-11-09
 

@@ -53,7 +53,7 @@ stays as the default.
 - Turn it off. With no car, the road ahead is clear and the motorcycle can
   use the centre lane.
 
-### Driving speed
+### Driving speed (done in 2.0: steady / song BPM / song energy)
 How fast our car travels (lane markings, streetlights, skyline drift):
 fixed, follow the song's BPM, or follow its energy. Ease between speeds at
 song changes, cap the extremes, and stay still with reduced motion.

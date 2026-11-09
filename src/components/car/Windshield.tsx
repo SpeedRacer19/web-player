@@ -9,8 +9,17 @@
 // horizon. None of it spawns in a background tab or with reduced motion on,
 // and the listener can switch the optional bits off (useSettings).
 
-import { useCallback, useEffect, useState, type AnimationEvent, type CSSProperties } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type AnimationEvent,
+  type CSSProperties,
+  type RefObject,
+} from 'react';
 import { useSettings } from '@/hooks/useSettings';
+import { useDrivingSpeed } from '@/hooks/useDrivingSpeed';
 import { useTimeOfDay } from '@/hooks/useTimeOfDay';
 import { SKYLINES, type SkylineLayer } from '@/components/car/skylines';
 import { rng } from '@/components/car/skylines-kit';
@@ -402,10 +411,53 @@ const SKYLINE_TILES = 4;
 const POLE_COUNT = 4;
 const POLE_CYCLE_S = 4.8;
 
+/** The keyframes that make up "driving": lane markings, streetlights and the
+ *  skyline, in the windshield and the mirror (index.css). */
+const DRIVE_ANIMATIONS = new Set(['road-scroll', 'pole-travel', 'pole-fade', 'skyline-drift', 'rv-road-scroll']);
+/** Seconds to cover most of the way to a new speed. */
+const SPEED_EASE_S = 1.5;
+
+/** Run the drive at `useDrivingSpeed()`'s pace by setting each animation's
+ *  playbackRate (changing a CSS duration would make everything jump; a rate
+ *  keeps every element where it is). Eases to a new speed, and re-applies
+ *  now and then so elements that remount (a skyline switch) keep the pace. */
+function useDrivePace(root: RefObject<HTMLDivElement | null>) {
+  const target = useDrivingSpeed();
+  const current = useRef(1);
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const apply = (rate: number) => {
+      for (const a of el.getAnimations({ subtree: true })) {
+        if (a instanceof CSSAnimation && DRIVE_ANIMATIONS.has(a.animationName)) a.playbackRate = rate;
+      }
+    };
+    let raf = 0;
+    let last = performance.now();
+    const step = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      const c = current.current;
+      const next = c + (target - c) * Math.min(1, dt / SPEED_EASE_S);
+      current.current = Math.abs(next - target) < 0.005 ? target : next;
+      apply(current.current);
+      if (current.current !== target) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    const keep = window.setInterval(() => apply(current.current), 2000);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearInterval(keep);
+    };
+  }, [target, root]);
+}
+
 export function Windshield() {
   const city = useCity();
+  const root = useRef<HTMLDivElement>(null);
+  useDrivePace(root);
   return (
-    <div className="relative min-h-[34vh] flex-1 overflow-hidden bg-[var(--cabin)]" aria-hidden>
+    <div ref={root} className="relative min-h-[34vh] flex-1 overflow-hidden bg-[var(--cabin)]" aria-hidden>
       {/* Sky */}
       <div className="sky">
         <Stars />

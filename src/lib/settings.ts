@@ -27,6 +27,10 @@ export const SKYLINE_CHOICES = [
 ] as const;
 export type SkylineSetting = (typeof SKYLINE_CHOICES)[number];
 
+/** How fast the car drives: steady, or following the song. */
+export const DRIVING_SPEEDS = ['steady', 'bpm', 'energy'] as const;
+export type DrivingSpeedSetting = (typeof DRIVING_SPEEDS)[number];
+
 export interface Settings {
   /** The motorcycle that now and then passes and rides off to the horizon.
    *  Off by default while its artwork is still being worked on. */
@@ -37,6 +41,8 @@ export interface Settings {
   timeOfDay: TimeOfDaySetting;
   /** The city skyline: the generated default, or a real city. */
   skyline: SkylineSetting;
+  /** How fast the car drives (useDrivingSpeed). */
+  drivingSpeed: DrivingSpeedSetting;
 }
 
 export const DEFAULTS: Settings = {
@@ -44,6 +50,7 @@ export const DEFAULTS: Settings = {
   shootingStars: true,
   timeOfDay: 'dusk',
   skyline: 'default',
+  drivingSpeed: 'steady',
 };
 
 /** Allowed values for settings that are a choice, not on/off. A stored value
@@ -51,6 +58,7 @@ export const DEFAULTS: Settings = {
 export const CHOICES: { [K in keyof Settings]?: readonly Settings[K][] } = {
   timeOfDay: TIME_OF_DAY,
   skyline: SKYLINE_CHOICES,
+  drivingSpeed: DRIVING_SPEEDS,
 };
 
 const KEY = 'subwave.settings.v1';

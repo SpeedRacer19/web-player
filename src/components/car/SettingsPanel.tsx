@@ -170,6 +170,14 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
             <Toggle name="shootingStars" label="Shooting stars" note="now and then, when the stars are out" />
             <Toggle name="motorcycle" label="Motorcycle" note="passes now and then · artwork in progress" />
           </Section>
+          <Section title="DRIVE">
+            <Choice
+              name="drivingSpeed"
+              label="Driving speed"
+              note="follow the song: its tempo, or its energy"
+              labels={{ steady: 'Steady', bpm: 'Song BPM', energy: 'Song energy' }}
+            />
+          </Section>
         </div>
 
         <footer className="flex h-10 shrink-0 items-center gap-3 border-t border-[color-mix(in_srgb,var(--lcd-fg)_25%,transparent)] px-3 text-[10px] tracking-widest sm:text-[11px]">

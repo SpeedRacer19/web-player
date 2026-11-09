@@ -134,6 +134,11 @@ the URL at import), and `useStationFeed` resets and restarts its loop on a switc
   `SKYLINES` registry. The `skyline` setting (ids in `SKYLINE_CHOICES`)
   picks one; SETUP labels come from each city's `name`. Fill with the passed colours so time of day applies; draw
   cities from reference rather than tracing others' artwork.
+- **Driving speed:** `useDrivingSpeed()` turns the `drivingSpeed` setting and
+  the heard track's `bpm` / `energy` into a pace multiple (1 = normal, capped
+  0.5–1.6). The windshield applies it as `playbackRate` on its driving CSS
+  animations (`DRIVE_ANIMATIONS`), easing between values; never change those
+  animations' durations at runtime (that makes them jump).
 - `config.version` is `package.json`'s version, injected at build time as
   `__APP_VERSION__` (`vite.config.ts`). Bump `package.json` to change it.
 - **Render the current song from `heardTrack`, not `nowPlaying.nowPlaying`.**
