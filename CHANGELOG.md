@@ -29,6 +29,9 @@ All notable changes to this player are recorded here. The format follows
   Finance Centre towers in the far layer; the Guangzhou Circle, the Haixin
   Bridge arch, the Opera House and a pagoda in the near layer. It follows the
   time of day like the default, and the rear-view mirror shows it too.
+  **Delhi**: Qutub Minar and Humayun's Tomb with the newer high-rises behind;
+  India Gate, the Lotus Temple, Jama Masjid and the Red Fort's Lahori Gate in
+  front.
 
 ## [1.5.0] — 2026-11-09
 

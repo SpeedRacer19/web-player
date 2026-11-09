@@ -38,7 +38,7 @@ along: the sun rising instead of setting, fewer lit windows at dawn,
 streetlights off by day, stars only at night. The rear-view mirror shows the
 opposite sky. Option: follow the clock (station or listener local time).
 
-### City skylines (started in 2.0: Default + Guangzhou)
+### City skylines (started in 2.0: Default, Guangzhou, Delhi)
 Next cities to draw: New York, Tokyo, Paris, … (see `skylines.tsx`).
 
 Real cities (e.g. New York, Tokyo, Paris), from existing artwork or
