@@ -111,6 +111,11 @@ the URL at import), and `useStationFeed` resets and restarts its loop on a switc
 - **Recent stations:** typed and shared stations go in a recent list (max 5,
   localStorage, `useRecentStations()`), all in `config.ts`. `useStationFeed`
   fills in a station's name from `dj.station` when it answers.
+- **Listener settings:** `src/lib/settings.ts` is a small localStorage store of
+  switches for optional features (`shootingStars` default on; `motorcycle`
+  default off while its art is unfinished), read with `useSettings()`. Add a switch to `Settings` + `DEFAULTS` and
+  check it where the feature renders; a settings dashboard only has to call
+  `set(key, value)`. New optional scenery should get a switch here.
 - `config.version` is `package.json`'s version, injected at build time as
   `__APP_VERSION__` (`vite.config.ts`). Bump `package.json` to change it.
 - **Render the current song from `heardTrack`, not `nowPlaying.nowPlaying`.**
