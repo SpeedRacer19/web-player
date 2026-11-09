@@ -4,6 +4,19 @@ All notable changes to this player are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
+## [1.5.0] — Unreleased
+
+### Added
+- **A livelier night sky.** About 70 stars of different sizes and brightness
+  (it was 10), each shimmering on its own slow rhythm instead of the whole sky
+  pulsing together.
+- **Shooting stars:** every 8–25 seconds, at random, a faint streak crosses the
+  upper sky in under a second.
+- **A passing motorcycle:** every 30–70 seconds a bike with a glowing tail
+  light comes up beside you from the left or right lane, settles into it and
+  rides off toward the horizon.
+- All of it pauses in a background tab and stays still with reduced motion.
+
 ## [1.4.0] — 2026-11-08
 
 ### Changed

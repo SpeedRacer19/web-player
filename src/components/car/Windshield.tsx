@@ -2,6 +2,13 @@
 // road with lane markings and streetlights streaming toward the driver.
 // Pure CSS/SVG — every moving part is a keyframe in src/index.css. This
 // component reads no station data; it's scenery.
+//
+// A few things happen at random, to keep the drive alive without drawing the
+// eye: stars shimmer on their own rhythms, a shooting star now and then, and
+// once in a while a motorcycle comes up beside us and rides off to the
+// horizon. None of it spawns in a background tab or with reduced motion on.
+
+import { useCallback, useEffect, useState, type AnimationEvent, type CSSProperties } from 'react';
 
 // Deterministic pseudo-random so the skyline is the same on every render.
 function rng(seed: number) {
@@ -172,6 +179,157 @@ function RearView() {
   );
 }
 
+/** The starfield, fixed per build (seeded): mostly faint pinpoints, a few
+ *  brighter ones, more of them higher up. Each shimmers on its own period. */
+const STARS = (() => {
+  const r = rng(99);
+  return Array.from({ length: 70 }, () => {
+    const roll = r();
+    const size = roll < 0.7 ? 1 : roll < 0.92 ? 1.5 : 2;
+    const period = 2.5 + r() * 5;
+    return {
+      left: `${(r() * 100).toFixed(2)}%`,
+      top: `${(Math.pow(r(), 1.4) * 100).toFixed(2)}%`,
+      size,
+      opacity: (size === 2 ? 0.75 : 0.3) + r() * 0.5,
+      period,
+      delay: -r() * period,
+    };
+  });
+})();
+
+function Stars() {
+  return (
+    <div className="stars">
+      {STARS.map((s, i) => (
+        <span
+          key={i}
+          className={`star ${s.size === 2 ? 'bright' : ''}`}
+          style={
+            {
+              left: s.left,
+              top: s.top,
+              width: s.size,
+              height: s.size,
+              '--o': s.opacity.toFixed(2),
+              animationDuration: `${s.period.toFixed(2)}s`,
+              animationDelay: `${s.delay.toFixed(2)}s`,
+            } as CSSProperties
+          }
+        />
+      ))}
+    </div>
+  );
+}
+
+/** Fires an event at a random interval between `minS` and `maxS` seconds.
+ *  Skipped while the tab is hidden or the listener prefers reduced motion.
+ *  Returns the current event (a fresh id and a random 0–1 to place it) and a
+ *  function to clear it once its animation has finished. */
+function useRandomEvent(minS: number, maxS: number) {
+  const [event, setEvent] = useState<{ id: number; r: number } | null>(null);
+  useEffect(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let timer: number;
+    const schedule = () => {
+      timer = window.setTimeout(
+        () => {
+          if (!document.hidden && !reduce.matches) setEvent({ id: Date.now(), r: Math.random() });
+          schedule();
+        },
+        (minS + Math.random() * (maxS - minS)) * 1000,
+      );
+    };
+    schedule();
+    return () => window.clearTimeout(timer);
+  }, [minS, maxS]);
+  const clear = useCallback(() => setEvent(null), []);
+  return [event, clear] as const;
+}
+
+/** Only an element's own animation ending counts (not a child's). */
+const own = (fn: () => void) => (e: AnimationEvent) => {
+  if (e.target === e.currentTarget) fn();
+};
+
+/** A faint streak across the upper sky, every 8–25s. */
+function ShootingStar() {
+  const [shot, clear] = useRandomEvent(8, 25);
+  if (!shot) return null;
+  const r = rng(Math.floor(shot.r * 1e9));
+  const leftward = r() < 0.5;
+  const angle = 14 + r() * 22; // degrees below horizontal
+  return (
+    <span
+      key={shot.id}
+      className="shooting-star"
+      onAnimationEnd={own(clear)}
+      style={
+        {
+          left: `${(leftward ? 35 : 8) + r() * 55}%`,
+          top: `${4 + r() * 30}%`,
+          '--angle': `${leftward ? 180 - angle : angle}deg`,
+        } as CSSProperties
+      }
+    />
+  );
+}
+
+/** Rear view of a motorcycle and rider: a dark silhouette with the sunset on
+ *  the helmet and a glowing tail light. */
+function MotorcycleArt() {
+  return (
+    <svg viewBox="0 0 40 72" className="block h-full w-full" aria-hidden>
+      <defs>
+        <linearGradient id="mc-body" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#3a2640" />
+          <stop offset="1" stopColor="#0b070e" />
+        </linearGradient>
+        <filter id="mc-glow" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation="1.6" result="b" />
+          <feMerge>
+            <feMergeNode in="b" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      {/* rear tyre */}
+      <rect x="16" y="52" width="8" height="20" rx="3" fill="#050306" />
+      {/* bike body + seat */}
+      <path d="M11 40 Q20 34 29 40 L27 54 H13 Z" fill="url(#mc-body)" />
+      {/* rider: torso, arms to the bars, helmet with sunset on top */}
+      <path d="M12 38 Q13 22 20 20 Q27 22 28 38 Z" fill="url(#mc-body)" />
+      <path d="M12 30 L5 34 M28 30 L35 34" stroke="#160f1b" strokeWidth="3" strokeLinecap="round" />
+      <circle cx="20" cy="13" r="7.5" fill="#1a1120" />
+      <path d="M13.5 11 Q20 4 26.5 11" stroke="#ff8a6a" strokeOpacity="0.55" strokeWidth="1.5" fill="none" />
+      {/* tail light + plate */}
+      <g filter="url(#mc-glow)">
+        <rect x="15" y="44" width="10" height="3.5" rx="1.5" fill="var(--taillight)" />
+      </g>
+      <rect x="16.5" y="49" width="7" height="3" rx="0.5" fill="#cfc6b8" fillOpacity="0.3" />
+    </svg>
+  );
+}
+
+/** Every 30–70s a motorcycle comes up beside us (from the left or right
+ *  lane), settles into that lane and rides off over the horizon. It lives on
+ *  the 3D road plane, so perspective shrinks it as it pulls away. */
+function Motorcycle() {
+  const [ride, clear] = useRandomEvent(30, 70);
+  if (!ride) return null;
+  return (
+    <div
+      key={ride.id}
+      className={`bike-track ${ride.r < 0.5 ? 'left' : 'right'}`}
+      onAnimationEnd={own(clear)}
+    >
+      <div className="bike">
+        <MotorcycleArt />
+      </div>
+    </div>
+  );
+}
+
 const SKYLINE_TILES = 4;
 const POLE_COUNT = 4;
 const POLE_CYCLE_S = 4.8;
@@ -181,7 +339,8 @@ export function Windshield() {
     <div className="relative min-h-[34vh] flex-1 overflow-hidden bg-[var(--cabin)]" aria-hidden>
       {/* Sky */}
       <div className="sky">
-        <div className="stars" />
+        <Stars />
+        <ShootingStar />
         <div className="sun-glow" />
         <div className="sun" />
         <Skyline
@@ -207,6 +366,7 @@ export function Windshield() {
           <div className="road-mark cats-eye" style={{ right: '10.5%' }} />
           <div className="road-mark lane-dash" style={{ left: '36.3%' }} />
           <div className="road-mark lane-dash" style={{ right: '36.3%' }} />
+          <Motorcycle />
           <div className="lead-car-glow" />
           <div className="lead-car">
             <LeadCar />
