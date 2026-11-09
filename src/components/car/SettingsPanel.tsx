@@ -147,6 +147,12 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
               note="auto follows your clock"
               labels={{ auto: 'Auto', dawn: 'Dawn', day: 'Day', dusk: 'Dusk', night: 'Night' }}
             />
+            <Choice
+              name="skyline"
+              label="Skyline"
+              note="the city on the horizon"
+              labels={{ default: 'Default', guangzhou: 'Guangzhou' }}
+            />
             <Toggle name="shootingStars" label="Shooting stars" note="now and then, when the stars are out" />
             <Toggle name="motorcycle" label="Motorcycle" note="passes now and then · artwork in progress" />
           </Section>

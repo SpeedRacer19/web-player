@@ -23,6 +23,12 @@ All notable changes to this player are recorded here. The format follows
   shows the sky behind you (still night at dawn and dusk, blue by day), and
   the dash picks up the sky's colour. Shooting stars only appear when the
   stars are out.
+- **Skyline** (SETUP → Scenery): the city on the horizon. **Default** is the
+  original generated city (unchanged, pixel for pixel). **Guangzhou** is a new
+  hand-drawn skyline: Canton Tower with its lit lattice, the IFC and CTF
+  Finance Centre towers in the far layer; the Guangzhou Circle, the Haixin
+  Bridge arch, the Opera House and a pagoda in the near layer. It follows the
+  time of day like the default, and the rear-view mirror shows it too.
 
 ## [1.5.0] — 2026-11-09
 

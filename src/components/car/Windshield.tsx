@@ -12,85 +12,24 @@
 import { useCallback, useEffect, useState, type AnimationEvent, type CSSProperties } from 'react';
 import { useSettings } from '@/hooks/useSettings';
 import { useTimeOfDay } from '@/hooks/useTimeOfDay';
+import { SKYLINES, rng, type SkylineLayer } from '@/components/car/skylines';
 
-// Deterministic pseudo-random so the skyline is the same on every render.
-function rng(seed: number) {
-  let s = seed;
-  return () => {
-    s = (s * 1664525 + 1013904223) % 4294967296;
-    return s / 4294967296;
-  };
+/** The city chosen in SETUP (skylines.tsx). */
+function useCity() {
+  const { settings } = useSettings();
+  return SKYLINES[settings.skyline] ?? SKYLINES.default;
 }
 
-interface Building {
-  x: number;
-  w: number;
-  h: number;
-  windows: { x: number; y: number }[];
-}
-
-function buildSkyline(seed: number, width: number, height: number, minH: number, density: number) {
-  const r = rng(seed);
-  const buildings: Building[] = [];
-  let x = 0;
-  while (x < width) {
-    let w = 18 + Math.floor(r() * 46);
-    // The last building ends exactly on the tile edge so tiles butt seamlessly.
-    if (width - x - w < 18) w = width - x;
-    const h = minH + Math.floor(r() * (height - minH));
-    const windows: { x: number; y: number }[] = [];
-    for (let wy = height - h + 6; wy < height - 6; wy += 7) {
-      for (let wx = x + 4; wx < x + w - 5; wx += 6) {
-        if (r() < density) windows.push({ x: wx, y: wy });
-      }
-    }
-    buildings.push({ x, w, h, windows });
-    x += w + (x + w >= width ? 0 : Math.floor(r() * 6));
-  }
-  return buildings;
-}
-
-const FAR = { width: 1200, height: 110, data: buildSkyline(7, 1200, 110, 30, 0.12) };
-const NEAR = { width: 1200, height: 80, data: buildSkyline(42, 1200, 80, 14, 0.2) };
-
-function SkylineTile({
-  layer,
-  fill,
-  windowFill,
-}: {
-  layer: typeof FAR;
-  fill: string;
-  windowFill: string;
-}) {
+function SkylineTile({ layer, fill, windowFill }: { layer: SkylineLayer; fill: string; windowFill: string }) {
   return (
-    <svg
-      viewBox={`0 0 ${layer.width} ${layer.height}`}
-      aria-hidden
-    >
-      {layer.data.map((b, i) => (
-        <g key={i}>
-          <rect x={b.x} y={layer.height - b.h} width={b.w} height={b.h} fill={fill} />
-          {/* A few rooftop antennas for silhouette interest. */}
-          {i % 5 === 0 && (
-            <rect x={b.x + b.w / 2} y={layer.height - b.h - 10} width={1.5} height={10} fill={fill} />
-          )}
-          {/* .windows: how many are lit follows the time of day (--windows);
-              .win: some flicker (an animation, so it's on an inner group). */}
-          <g className="windows">
-            <g className={i % 3 === 0 ? 'win' : undefined}>
-              {b.windows.map((w, j) => (
-                <rect key={j} x={w.x} y={w.y} width={2.5} height={3} fill={windowFill} />
-              ))}
-            </g>
-          </g>
-        </g>
-      ))}
+    <svg viewBox={`0 0 ${layer.width} ${layer.height}`} aria-hidden>
+      {layer.art(fill, windowFill)}
     </svg>
   );
 }
 
 function Skyline({ layer, className, fill, windowFill }: {
-  layer: typeof FAR;
+  layer: SkylineLayer;
   className: string;
   fill: string;
   windowFill: string;
@@ -156,11 +95,12 @@ function LeadCar() {
  *  horizon, the lane markings and streetlights run away from you, and a pair
  *  of headlights follows a long way back. */
 function RearView() {
+  const city = useCity();
   return (
     <div className="rv">
       <div className="rv-sky">
         <div className="rv-stars" />
-        <Skyline layer={NEAR} className="rv-skyline" fill="var(--skyline-near)" windowFill="var(--window-near)" />
+        <Skyline layer={city.near} className="rv-skyline" fill="var(--skyline-near)" windowFill="var(--window-near)" />
       </div>
       <div className="rv-ground">
         <div className="rv-road">
@@ -462,6 +402,7 @@ const POLE_COUNT = 4;
 const POLE_CYCLE_S = 4.8;
 
 export function Windshield() {
+  const city = useCity();
   return (
     <div className="relative min-h-[34vh] flex-1 overflow-hidden bg-[var(--cabin)]" aria-hidden>
       {/* Sky */}
@@ -471,13 +412,13 @@ export function Windshield() {
         <div className="sun-glow" />
         <div className="sun" />
         <Skyline
-          layer={FAR}
+          layer={city.far}
           className="skyline-far"
           fill="var(--skyline-far)"
           windowFill="var(--window-far)"
         />
         <Skyline
-          layer={NEAR}
+          layer={city.near}
           className="skyline-near"
           fill="var(--skyline-near)"
           windowFill="var(--window-near)"

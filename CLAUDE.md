@@ -125,6 +125,11 @@ the URL at import), and `useStationFeed` resets and restarts its loop on a switc
   `--stars`, `--windows`, `--lamp-glow`, the mirror's `--rv-*`). Anything
   derived from the palette (`--dash-glow`) is re-declared on `.scene` so it
   follows. Keep new scenery colours in variables so every mode can set them.
+- **Skylines:** `src/components/car/skylines.tsx` holds each city as a FAR and
+  a NEAR 1200-unit SVG tile (`art(fill, windowFill)`), repeated and drifted by
+  the windshield; the mirror uses the NEAR tile. The `skyline` setting picks
+  one (`SKYLINES`). Fill with the passed colours so time of day applies; draw
+  cities from reference rather than tracing others' artwork.
 - `config.version` is `package.json`'s version, injected at build time as
   `__APP_VERSION__` (`vite.config.ts`). Bump `package.json` to change it.
 - **Render the current song from `heardTrack`, not `nowPlaying.nowPlaying`.**
