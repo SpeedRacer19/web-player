@@ -537,6 +537,79 @@ const houston: SkylineDef = {
   }),
 };
 
+// --- Bangkok, Thailand ------------------------------------------------------------
+const smallPrang = (x: number, base: number, h: number) =>
+  `M${x - 5} ${base} Q ${x - 3} ${base - h * 0.6} ${x} ${base - h} Q ${x + 3} ${base - h * 0.6} ${x + 5} ${base} Z`;
+
+const bangkok: SkylineDef = {
+  name: 'Bangkok',
+  far: layer({
+    height: F,
+    filler: [929, 18, 48, 0.12],
+    towers: [
+      { x: 120, w: 20, h: 64 },
+      { x: 146, w: 16, h: 56 },
+      { x: 520, w: 18, h: 60 },
+      { x: 960, w: 22, h: 68 },
+      { x: 990, w: 18, h: 58 },
+    ],
+    shapes: [
+      // Baiyoke Tower II: setbacks and a mast.
+      stepped(300, F, [
+        [11, 36],
+        [9, 26],
+        [6, 20],
+      ]),
+      spire(300, 20, 4),
+      // King Power MahaNakhon: a tall slab whose edges are cut away in
+      // "pixels" spiralling up the tower.
+      'M630 110 V42 H634 V36 H630 V20 H650 V32 H646 V40 H650 V52 H644 V58 H650 V70 H646 V76 H650 V110 Z',
+      // State Tower: setbacks crowned by its golden dome.
+      stepped(820, F, [
+        [13, 40],
+        [10, 30],
+      ]),
+      dome(820, 30, 7, 8),
+      spire(820, 23, 14),
+    ],
+  }),
+  near: layer({
+    height: N,
+    filler: [1030, 8, 22, 0.16],
+    shapes: [
+      // Wat Arun: the terraces, the central prang and four smaller ones.
+      rect(232, 72, 56, 8),
+      rect(240, 66, 40, 6),
+      'M248 80 L251 60 Q 254 36 258 22 L260 11 L262 22 Q 266 36 269 60 L272 80 Z',
+      smallPrang(236, 72, 26),
+      smallPrang(284, 72, 26),
+      smallPrang(224, 80, 18),
+      smallPrang(296, 80, 18),
+      // The Grand Palace: a hall under stacked, steep roofs and a spire.
+      rect(530, 60, 60, 20),
+      'M524 62 L540 50 H580 L596 62 Z',
+      'M532 52 L546 42 H574 L588 52 Z',
+      'M542 43 L552 34 H568 L578 43 Z',
+      taper(560, 34, 4, 0.8, 12),
+      // A golden chedi: the bell on its base, and its spire.
+      rect(628, 74, 24, 6),
+      'M630 74 Q 630 60 640 56 Q 650 60 650 74 Z',
+      taper(640, 57, 2.5, 0.6, 30),
+      // Rama VIII Bridge: the inverted-Y pylon and the deck.
+      'M894 80 L901 46 V24 H907 V46 L914 80 H910 L904 52 L898 80 Z',
+      rect(800, 64, 220, 3),
+    ],
+    strokes: [
+      ['M904 27 L840 64', 0.7],
+      ['M904 29 L860 64', 0.7],
+      ['M904 31 L880 64', 0.7],
+      ['M904 27 L968 64', 0.7],
+      ['M904 29 L948 64', 0.7],
+      ['M904 31 L928 64', 0.7],
+    ],
+  }),
+};
+
 export const CITIES = {
   kinshasa,
   jakarta,
@@ -548,4 +621,5 @@ export const CITIES = {
   newYork,
   tokyo,
   houston,
+  bangkok,
 };

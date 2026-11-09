@@ -23,6 +23,7 @@ export const SKYLINE_CHOICES = [
   'newYork',
   'tokyo',
   'houston',
+  'bangkok',
 ] as const;
 export type SkylineSetting = (typeof SKYLINE_CHOICES)[number];
 

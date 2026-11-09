@@ -39,8 +39,10 @@ All notable changes to this player are recorded here. The format follows
   Citadel, feluccas), **Bogotá** (Monserrate, BD Bacatá, Capitolio),
   **New York** (Empire State, Chrysler, One WTC, Brooklyn Bridge, Liberty),
   **Tokyo** (Mt Fuji, Skytree, Tokyo Tower, pagoda, torii, Rainbow Bridge)
-  and **Houston** (Bank of America Center, Pennzoil Place, San Jacinto
-  Monument, the Astrodome). SETUP lists them in a grid.
+  **Houston** (Bank of America Center, Pennzoil Place, San Jacinto
+  Monument, the Astrodome) and **Bangkok** (King Power MahaNakhon, Baiyoke
+  Tower II, the State Tower; Wat Arun, the Grand Palace, a golden chedi, the
+  Rama VIII Bridge). SETUP lists them in a grid.
 
 ## [1.5.0] — 2026-11-09
 
