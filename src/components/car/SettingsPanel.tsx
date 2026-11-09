@@ -9,6 +9,18 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { useSettings } from '@/hooks/useSettings';
 import { CHOICES, type Settings } from '@/lib/settings';
 import { SKYLINES } from '@/components/car/skylines';
+import { useAutoClock } from '@/hooks/useTimeOfDay';
+
+/** Every zone the browser knows, for the clock picker. */
+const ZONES: string[] = (() => {
+  try {
+    return Intl.supportedValuesOf('timeZone');
+  } catch {
+    return ['UTC', 'America/New_York', 'America/Chicago', 'Europe/London', 'Asia/Bangkok', 'Asia/Tokyo'];
+  }
+})();
+const LOCAL_ZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const isZone = (v: string) => v !== 'local' && v !== 'station';
 
 /** Skyline labels come from the cities themselves. */
 const SKYLINE_LABELS = Object.fromEntries(
@@ -112,8 +124,73 @@ function Choice<K extends ChoiceKey>({
   );
 }
 
+/** Which clock Auto time of day follows: yours, the station's, or a zone
+ *  picked from the list. Shows the zone and time in use, and the result. */
+function ClockRow() {
+  const { settings, set } = useSettings();
+  const clock = useAutoClock();
+  const choice = isZone(settings.clock) ? 'zone' : settings.clock;
+  const options = [
+    { id: 'local', label: 'Yours' },
+    { id: 'station', label: 'Station' },
+    { id: 'zone', label: 'Pick a zone' },
+  ] as const;
+  const shownZone = clock.zone ?? LOCAL_ZONE;
+  const sourceLabel = clock.source === 'station' ? 'Station' : clock.source === 'zone' ? 'Zone' : 'Your clock';
+  return (
+    <li className="px-2 py-1.5">
+      <div id="setting-clock" className="truncate text-xs font-bold uppercase tracking-wider sm:text-sm">
+        Clock
+      </div>
+      <div className="truncate text-[10px] opacity-60 sm:text-[11px]">
+        {settings.clock === 'station' && clock.source === 'local'
+          ? 'the station sends no time zone: using yours'
+          : 'whose time Auto follows'}
+      </div>
+      <div role="radiogroup" aria-labelledby="setting-clock" className="mt-1.5 flex gap-1">
+        {options.map((o) => {
+          const on = choice === o.id;
+          return (
+            <button
+              key={o.id}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              onClick={() =>
+                set('clock', o.id === 'zone' ? (isZone(settings.clock) ? settings.clock : shownZone) : o.id)
+              }
+              className={`lcd-row min-w-0 flex-1 truncate px-1 py-1 text-center text-[10px] font-bold uppercase tracking-wider sm:text-[11px] ${on ? 'active' : 'opacity-70'}`}
+              style={on ? { borderColor: 'color-mix(in srgb, var(--lcd-fg) 55%, transparent)' } : undefined}
+            >
+              {o.label}
+            </button>
+          );
+        })}
+      </div>
+      {choice === 'zone' && (
+        <select
+          aria-label="Time zone"
+          value={settings.clock}
+          onChange={(e) => set('clock', e.target.value)}
+          className="mt-1.5 h-7 w-full rounded-[2px] border bg-[var(--lcd-bg)] px-1.5 text-xs tracking-wide text-[var(--lcd-fg)] outline-none"
+          style={{ borderColor: 'color-mix(in srgb, var(--lcd-fg) 40%, transparent)' }}
+        >
+          {ZONES.map((z) => (
+            <option key={z} value={z}>
+              {z.replace(/_/g, ' ')}
+            </option>
+          ))}
+        </select>
+      )}
+      <div className="mt-1 truncate text-[10px] tracking-wider opacity-75 sm:text-[11px]">
+        {sourceLabel} · {shownZone.replace(/_/g, ' ')} · {clock.time} → {clock.timeOfDay.toUpperCase()}
+      </div>
+    </li>
+  );
+}
+
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
-  const { reset } = useSettings();
+  const { settings, reset } = useSettings();
   const panel = useRef<HTMLDivElement>(null);
 
   // Focus the panel on open; Escape closes it.
@@ -157,9 +234,10 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
             <Choice
               name="timeOfDay"
               label="Time of day"
-              note="auto follows your clock"
+              note="auto follows a clock (yours unless you pick another)"
               labels={{ auto: 'Auto', dawn: 'Dawn', day: 'Day', dusk: 'Dusk', night: 'Night' }}
             />
+            {settings.timeOfDay === 'auto' && <ClockRow />}
             <Choice
               name="skyline"
               label="Skyline"

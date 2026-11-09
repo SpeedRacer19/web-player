@@ -35,6 +35,17 @@ export type DrivingSpeedSetting = (typeof DRIVING_SPEEDS)[number];
 export const LEAD_CARS = ['coupe', 'pickup', 'classic', 'van', 'off'] as const;
 export type LeadCarSetting = (typeof LEAD_CARS)[number];
 
+/** Is this an IANA time-zone name the browser knows (e.g. 'Asia/Bangkok')? */
+export function isTimeZone(v: unknown): v is string {
+  if (typeof v !== 'string' || !v) return false;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: v });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export interface Settings {
   /** The motorcycle that now and then passes and rides off to the horizon.
    *  Off by default while its artwork is still being worked on. */
@@ -49,6 +60,9 @@ export interface Settings {
   drivingSpeed: DrivingSpeedSetting;
   /** The car ahead's style, or 'off' for a clear road. */
   leadCar: LeadCarSetting;
+  /** The clock Auto time of day follows: 'local' (the listener's device),
+   *  'station' (the station's time zone, from its feed), or an IANA zone. */
+  clock: string;
 }
 
 export const DEFAULTS: Settings = {
@@ -58,6 +72,12 @@ export const DEFAULTS: Settings = {
   skyline: 'default',
   drivingSpeed: 'steady',
   leadCar: 'coupe',
+  clock: 'local',
+};
+
+/** Settings whose valid values aren't a fixed list. */
+const VALID: { [K in keyof Settings]?: (v: unknown) => boolean } = {
+  clock: (v) => v === 'local' || v === 'station' || isTimeZone(v),
 };
 
 /** Allowed values for settings that are a choice, not on/off. A stored value
@@ -80,6 +100,7 @@ function read(): Settings {
       const v = stored[k];
       const allowed = CHOICES[k] as readonly unknown[] | undefined;
       if (typeof v !== typeof DEFAULTS[k] || (allowed && !allowed.includes(v))) continue;
+      if (VALID[k] && !VALID[k](v)) continue;
       (out as Record<string, unknown>)[k] = v;
     }
     return out;

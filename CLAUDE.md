@@ -118,8 +118,10 @@ the URL at import), and `useStationFeed` resets and restarts its loop on a switc
   `set(key, value)`. New optional scenery should get a switch here, and a
   row in `SettingsPanel.tsx` (the SETUP panel, opened by the hazard button
   above the stereo).
-- **Time of day:** `useTimeOfDay()` resolves the `timeOfDay` setting ('auto'
-  follows the listener's clock) to dawn / day / dusk / night; `App` puts
+- **Time of day:** `useTimeOfDay()` resolves the `timeOfDay` setting to
+  dawn / day / dusk / night; 'auto' follows the clock from `useAutoClock()`
+  (the `clock` setting: 'local', 'station' = the feed's `timezone`, or an
+  IANA zone, validated with `isTimeZone()`); `App` puts
   `scene tod-<mode>` on `<main>`. Dusk is the `:root` palette; `.tod-*` blocks
   near the end of `index.css` override the scene variables (sky, sun, land,
   `--stars`, `--windows`, `--lamp-glow`, the mirror's `--rv-*`). Anything

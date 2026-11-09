@@ -53,6 +53,11 @@ All notable changes to this player are recorded here. The format follows
   **Pickup**, **Classic** (fifties fins and round tail lights) or **Van**, or
   **Off** for a clear road. With no car ahead, the motorcycle (if switched
   on) can ride the centre lane too.
+- **Clock for Auto time of day** (SETUP, under Time of day when it's on Auto):
+  **Yours** (your device, the default), **Station** (the station's own time
+  zone, from its feed; yours if it doesn't send one), or **Pick a zone** from
+  the full list. It shows the zone and time in use and what that means
+  ("Station · Asia/Tokyo · 23:15 → NIGHT").
 
 ## [1.5.0] — 2026-11-09
 
