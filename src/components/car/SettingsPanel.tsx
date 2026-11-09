@@ -7,7 +7,7 @@
 
 import { useEffect, useRef, type ReactNode } from 'react';
 import { useSettings } from '@/hooks/useSettings';
-import type { Settings } from '@/lib/settings';
+import { CHOICES, type Settings } from '@/lib/settings';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -54,6 +54,51 @@ function Toggle({
   );
 }
 
+type ChoiceKey = keyof { [K in keyof Settings as Settings[K] extends boolean ? never : K]: true };
+
+/** A pick-one row: a strip of segment buttons (a radio group for assistive
+ *  tech). `labels` names each value; the order comes from CHOICES. */
+function Choice<K extends ChoiceKey>({
+  name,
+  label,
+  note,
+  labels,
+}: {
+  name: K;
+  label: string;
+  note?: string;
+  labels: Record<Settings[K], string>;
+}) {
+  const { settings, set } = useSettings();
+  const values = (CHOICES[name] ?? []) as readonly Settings[K][];
+  return (
+    <li className="px-2 py-1.5">
+      <div id={`setting-${name}`} className="truncate text-xs font-bold uppercase tracking-wider sm:text-sm">
+        {label}
+      </div>
+      {note && <div className="truncate text-[10px] opacity-60 sm:text-[11px]">{note}</div>}
+      <div role="radiogroup" aria-labelledby={`setting-${name}`} className="mt-1.5 flex gap-1">
+        {values.map((v) => {
+          const on = settings[name] === v;
+          return (
+            <button
+              key={String(v)}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              onClick={() => set(name, v)}
+              className={`lcd-row min-w-0 flex-1 truncate px-1 py-1 text-center text-[10px] font-bold uppercase tracking-wider sm:text-[11px] ${on ? 'active' : 'opacity-70'}`}
+              style={on ? { borderColor: 'color-mix(in srgb, var(--lcd-fg) 55%, transparent)' } : undefined}
+            >
+              {labels[v]}
+            </button>
+          );
+        })}
+      </div>
+    </li>
+  );
+}
+
 export function SettingsPanel({ onClose }: { onClose: () => void }) {
   const { reset } = useSettings();
   const panel = useRef<HTMLDivElement>(null);
@@ -96,7 +141,13 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
 
         <div className="lcd-scroll min-h-0 flex-1 overflow-y-auto px-3 py-3">
           <Section title="SCENERY">
-            <Toggle name="shootingStars" label="Shooting stars" note="a faint streak across the sky now and then" />
+            <Choice
+              name="timeOfDay"
+              label="Time of day"
+              note="auto follows your clock"
+              labels={{ auto: 'Auto', dawn: 'Dawn', day: 'Day', dusk: 'Dusk', night: 'Night' }}
+            />
+            <Toggle name="shootingStars" label="Shooting stars" note="now and then, when the stars are out" />
             <Toggle name="motorcycle" label="Motorcycle" note="passes now and then · artwork in progress" />
           </Section>
         </div>

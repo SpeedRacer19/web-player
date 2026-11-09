@@ -118,6 +118,13 @@ the URL at import), and `useStationFeed` resets and restarts its loop on a switc
   `set(key, value)`. New optional scenery should get a switch here, and a
   row in `SettingsPanel.tsx` (the SETUP panel, opened by the hazard button
   above the stereo).
+- **Time of day:** `useTimeOfDay()` resolves the `timeOfDay` setting ('auto'
+  follows the listener's clock) to dawn / day / dusk / night; `App` puts
+  `scene tod-<mode>` on `<main>`. Dusk is the `:root` palette; `.tod-*` blocks
+  near the end of `index.css` override the scene variables (sky, sun, land,
+  `--stars`, `--windows`, `--lamp-glow`, the mirror's `--rv-*`). Anything
+  derived from the palette (`--dash-glow`) is re-declared on `.scene` so it
+  follows. Keep new scenery colours in variables so every mode can set them.
 - `config.version` is `package.json`'s version, injected at build time as
   `__APP_VERSION__` (`vite.config.ts`). Bump `package.json` to change it.
 - **Render the current song from `heardTrack`, not `nowPlaying.nowPlaying`.**

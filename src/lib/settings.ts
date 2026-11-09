@@ -4,17 +4,30 @@
 // to Settings and DEFAULTS; anything missing from storage gets its default,
 // so new switches arrive switched to their default for existing listeners.
 
+/** The scene's time of day. 'auto' follows the listener's clock. */
+export type TimeOfDaySetting = 'auto' | 'dawn' | 'day' | 'dusk' | 'night';
+export const TIME_OF_DAY: readonly TimeOfDaySetting[] = ['auto', 'dawn', 'day', 'dusk', 'night'];
+
 export interface Settings {
   /** The motorcycle that now and then passes and rides off to the horizon.
    *  Off by default while its artwork is still being worked on. */
   motorcycle: boolean;
-  /** The occasional shooting star. */
+  /** The occasional shooting star (only when stars are out: dusk, night). */
   shootingStars: boolean;
+  /** The scene's palette: dawn, day, dusk (the original look) or night. */
+  timeOfDay: TimeOfDaySetting;
 }
 
 export const DEFAULTS: Settings = {
   motorcycle: false,
   shootingStars: true,
+  timeOfDay: 'dusk',
+};
+
+/** Allowed values for settings that are a choice, not on/off. A stored value
+ *  outside its list falls back to the default. */
+export const CHOICES: { [K in keyof Settings]?: readonly Settings[K][] } = {
+  timeOfDay: TIME_OF_DAY,
 };
 
 const KEY = 'subwave.settings.v1';
@@ -25,7 +38,10 @@ function read(): Settings {
     const stored = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
     const out = { ...DEFAULTS };
     for (const k of Object.keys(DEFAULTS) as (keyof Settings)[]) {
-      if (typeof stored[k] === typeof DEFAULTS[k]) out[k] = stored[k] as Settings[typeof k];
+      const v = stored[k];
+      const allowed = CHOICES[k] as readonly unknown[] | undefined;
+      if (typeof v !== typeof DEFAULTS[k] || (allowed && !allowed.includes(v))) continue;
+      (out as Record<string, unknown>)[k] = v;
     }
     return out;
   } catch {

@@ -14,6 +14,15 @@ All notable changes to this player are recorded here. The format follows
   Reset to defaults; each 2.0 feature adds its own section. Choices are saved
   on the device. Escape, ✕ EXIT or a click outside closes it.
 - The hazard button now shows on phones too, centred above the stereo.
+- **Time of day** (SETUP → Scenery): Dawn, Day, Dusk (the original look, and
+  the default) or Night, or Auto to follow your clock (dawn 5–8, day 8–17,
+  dusk 17–20, night after 20). Each swaps the scene's palette, and the details
+  follow: a pale sun rising at dawn, a small high sun by day, a moon at night;
+  stars faint at dawn, gone by day, everywhere at night; city windows dark by
+  day and fewer lit at dawn; streetlights off by day. The rear-view mirror
+  shows the sky behind you (still night at dawn and dusk, blue by day), and
+  the dash picks up the sky's colour. Shooting stars only appear when the
+  stars are out.
 
 ## [1.5.0] — 2026-11-09
 

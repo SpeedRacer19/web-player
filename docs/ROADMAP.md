@@ -29,7 +29,9 @@ The lane markings, the car ahead, the streetlights, the motorcycle's lane and
 the rear-view mirror would all follow the chosen layout. It would be a setting
 in the dashboard above.
 
-### Time of day
+### Time of day (done in 2.0: dawn / day / dusk / night / auto by the listener's clock)
+Still to come: follow the *station's* clock (`/state.timezone`) as an option.
+
 Swap the scene's colour palette (the CSS variables at the top of
 `src/index.css`): dawn, midday, dusk (today) and night. Details follow
 along: the sun rising instead of setting, fewer lit windows at dawn,

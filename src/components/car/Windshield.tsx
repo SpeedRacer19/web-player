@@ -11,6 +11,7 @@
 
 import { useCallback, useEffect, useState, type AnimationEvent, type CSSProperties } from 'react';
 import { useSettings } from '@/hooks/useSettings';
+import { useTimeOfDay } from '@/hooks/useTimeOfDay';
 
 // Deterministic pseudo-random so the skyline is the same on every render.
 function rng(seed: number) {
@@ -73,10 +74,14 @@ function SkylineTile({
           {i % 5 === 0 && (
             <rect x={b.x + b.w / 2} y={layer.height - b.h - 10} width={1.5} height={10} fill={fill} />
           )}
-          <g className={i % 3 === 0 ? 'win' : undefined}>
-            {b.windows.map((w, j) => (
-              <rect key={j} x={w.x} y={w.y} width={2.5} height={3} fill={windowFill} />
-            ))}
+          {/* .windows: how many are lit follows the time of day (--windows);
+              .win: some flicker (an animation, so it's on an inner group). */}
+          <g className="windows">
+            <g className={i % 3 === 0 ? 'win' : undefined}>
+              {b.windows.map((w, j) => (
+                <rect key={j} x={w.x} y={w.y} width={2.5} height={3} fill={windowFill} />
+              ))}
+            </g>
           </g>
         </g>
       ))}
@@ -255,11 +260,14 @@ const own = (fn: () => void) => (e: AnimationEvent) => {
   if (e.target === e.currentTarget) fn();
 };
 
-/** A faint streak across the upper sky, every 8–25s. */
+/** A faint streak across the upper sky, every 8–25s, while there are stars
+ *  to see (dusk and night). */
 function ShootingStar() {
   const { settings } = useSettings();
-  const [shot, clear] = useRandomEvent(8, 25, settings.shootingStars);
-  if (!shot || !settings.shootingStars) return null;
+  const tod = useTimeOfDay();
+  const on = settings.shootingStars && (tod === 'dusk' || tod === 'night');
+  const [shot, clear] = useRandomEvent(8, 25, on);
+  if (!shot || !on) return null;
   const r = rng(Math.floor(shot.r * 1e9));
   const leftward = r() < 0.5;
   const angle = 14 + r() * 22; // degrees below horizontal
