@@ -141,6 +141,13 @@ the URL at import), and `useStationFeed` resets and restarts its loop on a switc
   0.5–1.6). The windshield applies it as `playbackRate` on its driving CSS
   animations (`DRIVE_ANIMATIONS`), easing between values; never change those
   animations' durations at runtime (that makes them jump).
+- **Road layouts:** the `roadLayout` setting picks one of `ROADS` in
+  `Windshield.tsx`: the asphalt span, markings, streetlight positions, the
+  lanes beside us a motorcycle may use, and an oncoming lane. Positions are %
+  of the road plane; the viewer is always at 50%, mid-lane (lanes are 27.4
+  wide), so layouts move the road, never the viewpoint. Anything placed off
+  centre on the plane stands up at `rotateX(-82deg)` (the plane is tipped
+  82deg), or perspective shears it.
 - **Car ahead:** the `leadCar` setting picks one of `CARS` in `Windshield.tsx`
   (each an SVG rear view, its aspect and its width on the road plane) or
   'off'; with no car the motorcycle may use the centre lane.

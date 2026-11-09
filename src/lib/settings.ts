@@ -46,6 +46,10 @@ export function isTimeZone(v: unknown): v is string {
   }
 }
 
+/** The road ahead: one lane, two-way, three lanes (the original) or a motorway. */
+export const ROAD_LAYOUTS = ['single', 'twoWay', 'three', 'motorway'] as const;
+export type RoadLayoutSetting = (typeof ROAD_LAYOUTS)[number];
+
 export interface Settings {
   /** The motorcycle that now and then passes and rides off to the horizon.
    *  Off by default while its artwork is still being worked on. */
@@ -63,6 +67,8 @@ export interface Settings {
   /** The clock Auto time of day follows: 'local' (the listener's device),
    *  'station' (the station's time zone, from its feed), or an IANA zone. */
   clock: string;
+  /** The road's layout (Windshield ROADS). */
+  roadLayout: RoadLayoutSetting;
 }
 
 export const DEFAULTS: Settings = {
@@ -73,6 +79,7 @@ export const DEFAULTS: Settings = {
   drivingSpeed: 'steady',
   leadCar: 'coupe',
   clock: 'local',
+  roadLayout: 'three',
 };
 
 /** Settings whose valid values aren't a fixed list. */
@@ -87,6 +94,7 @@ export const CHOICES: { [K in keyof Settings]?: readonly Settings[K][] } = {
   skyline: SKYLINE_CHOICES,
   drivingSpeed: DRIVING_SPEEDS,
   leadCar: LEAD_CARS,
+  roadLayout: ROAD_LAYOUTS,
 };
 
 const KEY = 'subwave.settings.v1';

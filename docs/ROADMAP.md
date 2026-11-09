@@ -17,7 +17,7 @@ row in the panel.
 - Every new optional piece of scenery should arrive with a switch, so the
   dashboard grows with it.
 
-### Road layouts
+### Road layouts (done in 2.0: single lane / two-way / three lanes / motorway)
 Let the listener pick the road outside the windshield:
 
 - single lane

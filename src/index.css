@@ -53,6 +53,7 @@
   --road: #1b1622;
   --road-edge: #2b2433;
   --lane: #e9e3f2;
+  --centre-line: #f2c14a;
   --reflector: #ffb547;
   --streetlight: #ffc06b;
   /* Streetlight glow strength (0 = off, by day). */
@@ -319,21 +320,40 @@ body {
   transform-origin: 50% 100%;
   transform: translateX(-50%) rotateX(82deg);
   transform-style: preserve-3d;
-  background: linear-gradient(
-    to right,
-    transparent 0 6%,
-    var(--road-edge) 6% 8%,
-    var(--road) 8% 92%,
-    var(--road-edge) 92% 94%,
-    transparent 94%
-  );
 }
 
+/* The asphalt, sized per road layout (Windshield ROADS); --shoulder is the
+   darker edge strip, as a share of the surface's width. */
+.road-surface {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to right,
+    var(--road-edge) 0 var(--shoulder),
+    var(--road) var(--shoulder) calc(100% - var(--shoulder)),
+    var(--road-edge) calc(100% - var(--shoulder))
+  );
+}
+/* Marks are placed by their centre line (`left` = where the line runs). */
 .road-mark {
   position: absolute;
   top: 0;
   bottom: 0;
+  translate: -50% 0;
   animation: road-scroll 0.42s linear infinite;
+}
+/* Two-way roads: a double yellow centre line. */
+.road-mark.centre,
+.rv-mark.centre {
+  width: 1.1%;
+  background: linear-gradient(
+    to right,
+    var(--centre-line) 0 35%,
+    transparent 35% 65%,
+    var(--centre-line) 65%
+  );
+  animation: none;
 }
 .road-mark.edge {
   width: 0.5%;
@@ -581,6 +601,49 @@ body {
   }
 }
 
+/* An oncoming car (two-way roads): it rides the plane from the horizon
+   toward us and past (the track, like .pole-track), stood up 82deg to face
+   us square-on off-centre, fading in out of the haze. */
+.oncoming-track {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  animation: oncoming-ride 7s linear forwards;
+}
+@keyframes oncoming-ride {
+  0% {
+    transform: translateY(-96%);
+  }
+  55% {
+    transform: translateY(-30%);
+  }
+  80% {
+    transform: translateY(-9%);
+  }
+  100% {
+    transform: translateY(3%);
+  }
+}
+.oncoming {
+  position: absolute;
+  bottom: 0;
+  width: 13%;
+  aspect-ratio: 200 / 92;
+  translate: -50% 0;
+  transform-origin: 50% 100%;
+  transform: rotateX(-82deg);
+  animation: oncoming-fade 7s linear forwards;
+}
+@keyframes oncoming-fade {
+  0% {
+    opacity: 0;
+  }
+  12%,
+  100% {
+    opacity: 1;
+  }
+}
+
 .lead-car {
   position: absolute;
   left: 50%;
@@ -715,19 +778,12 @@ body {
   transform-origin: 50% 100%;
   transform: translateX(-50%) rotateX(82deg);
   transform-style: preserve-3d;
-  background: linear-gradient(
-    to right,
-    transparent 0 6%,
-    var(--road-edge) 6% 8%,
-    var(--road) 8% 92%,
-    var(--road-edge) 92% 94%,
-    transparent 94%
-  );
 }
 .rv-mark {
   position: absolute;
   top: 0;
   bottom: 0;
+  translate: -50% 0;
 }
 .rv-mark.edge {
   width: 0.6%;
@@ -1653,6 +1709,8 @@ body {
   .stars,
   .star,
   .shooting-star,
+  .oncoming-track,
+  .oncoming,
   .bike-track,
   .bike,
   .bike-lean,

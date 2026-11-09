@@ -58,6 +58,15 @@ All notable changes to this player are recorded here. The format follows
   zone, from its feed; yours if it doesn't send one), or **Pick a zone** from
   the full list. It shows the zone and time in use and what that means
   ("Station · Asia/Tokyo · 23:15 → NIGHT").
+- **Road layouts** (SETUP → Drive → Road): **Single lane**, **Two-way** (a
+  double yellow centre line, with oncoming cars passing now and then),
+  **Three lanes** (the original, default) or **Motorway** (five lanes). You
+  always drive in the middle of your own lane: the road is laid out around
+  you, so the view's perspective never changes. The car ahead stays in your
+  lane; streetlights stand at the road's edges; the mirror shows the same
+  road; the motorcycle only uses lanes beside you that run your way (on a
+  single lane or two-way road, only your own lane, and only with no car
+  ahead).
 
 ## [1.5.0] — 2026-11-09
 

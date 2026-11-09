@@ -22,6 +22,7 @@ import { useSettings } from '@/hooks/useSettings';
 import { useDrivingSpeed } from '@/hooks/useDrivingSpeed';
 import { useTimeOfDay } from '@/hooks/useTimeOfDay';
 import { SKYLINES, type SkylineLayer } from '@/components/car/skylines';
+import type { RoadLayoutSetting } from '@/lib/settings';
 import { rng } from '@/components/car/skylines-kit';
 
 /** The city chosen in SETUP (skylines.tsx). */
@@ -209,6 +210,43 @@ const CARS = {
   van: { Art: VanArt, aspect: '190 / 130', width: '13.5%' },
 } as const;
 
+/** An oncoming car, front on: dark body, windshield catching the sky, two
+ *  bright headlights. */
+function OncomingArt() {
+  return (
+    <svg viewBox="0 0 200 92" className="block h-full w-full overflow-visible" aria-hidden>
+      <CarDefs />
+      <rect x="14" y="74" width="30" height="18" rx="4" fill="#050306" />
+      <rect x="156" y="74" width="30" height="18" rx="4" fill="#050306" />
+      <path d="M36 42 L54 9 Q57 5 63 5 H137 Q143 5 146 9 L164 42 Z" fill="url(#lc-body)" />
+      <path d="M46 39 L60 12 H140 L154 39 Z" fill="url(#lc-glass)" />
+      <rect x="4" y="38" width="192" height="42" rx="10" fill="url(#lc-body)" />
+      <rect x="70" y="54" width="60" height="12" rx="3" fill="#0a070c" />
+      <g filter="url(#lc-glow)">
+        <rect x="12" y="46" width="40" height="11" rx="4" fill="#fff6dc" />
+        <rect x="148" y="46" width="40" height="11" rx="4" fill="#fff6dc" />
+      </g>
+    </svg>
+  );
+}
+
+/** Two-way roads: every 9–22s a car comes toward us in the oncoming lane and
+ *  passes. Stood up by 82deg like the motorcycle so it isn't sheared off
+ *  centre. */
+function Oncoming() {
+  const road = useRoad();
+  const on = road.oncoming !== undefined;
+  const [car, clear] = useRandomEvent(9, 22, on);
+  if (!car || !on) return null;
+  return (
+    <div key={car.id} className="oncoming-track" onAnimationEnd={own(clear)}>
+      <div className="oncoming" style={{ left: `${road.oncoming}%` }}>
+        <OncomingArt />
+      </div>
+    </div>
+  );
+}
+
 function LeadCar() {
   const { settings } = useSettings();
   if (settings.leadCar === 'off') return null;
@@ -229,6 +267,7 @@ function LeadCar() {
  *  of headlights follows a long way back. */
 function RearView() {
   const city = useCity();
+  const road = useRoad();
   return (
     <div className="rv">
       <div className="rv-sky">
@@ -237,18 +276,15 @@ function RearView() {
       </div>
       <div className="rv-ground">
         <div className="rv-road">
-          <div className="rv-mark edge" style={{ left: '9%' }} />
-          <div className="rv-mark edge" style={{ right: '9%' }} />
-          <div className="rv-mark lane-dash" style={{ left: '36.3%' }} />
-          <div className="rv-mark lane-dash" style={{ right: '36.3%' }} />
+          <RoadMarkings road={road} prefix="rv" />
           {Array.from({ length: POLE_COUNT }, (_, i) => (
             <div
               key={i}
               className="rv-pole-track"
               style={{ '--d': `${(-i * POLE_CYCLE_S) / POLE_COUNT}s` } as React.CSSProperties}
             >
-              <div className="rv-pole left" />
-              <div className="rv-pole right" />
+              <div className="rv-pole left" style={{ left: `${road.poles[0]}%` }} />
+              <div className="rv-pole right" style={{ right: `${100 - road.poles[1]}%` }} />
             </div>
           ))}
         </div>
@@ -516,10 +552,14 @@ function MotorcycleArt() {
  *  squarely (see .bike), so perspective scales it without shearing it. */
 function Motorcycle() {
   const { settings } = useSettings();
+  const road = useRoad();
   const [ride, clear] = useRandomEvent(30, 70, settings.motorcycle);
   if (!ride || !settings.motorcycle) return null;
-  // With no car ahead the centre lane is free too.
-  const lanes = settings.leadCar === 'off' ? (['left', 'center', 'right'] as const) : (['left', 'right'] as const);
+  // Lanes beside us that run our way (by road layout), and our own lane too
+  // when there's no car ahead. None at all: no ride this time.
+  const lanes: ('left' | 'center' | 'right')[] = [...road.bikeLanes];
+  if (settings.leadCar === 'off') lanes.splice(lanes.length / 2, 0, 'center');
+  if (!lanes.length) return null;
   const side = lanes[Math.floor(ride.r * lanes.length)];
   return (
     <div key={ride.id} className={`bike-track ${side}`} onAnimationEnd={own(clear)}>
@@ -529,6 +569,101 @@ function Motorcycle() {
         </div>
       </div>
     </div>
+  );
+}
+
+/* --- Road layouts ------------------------------------------------------------
+   Positions are % of the road plane's width; the viewer sits at 50%, always
+   in the middle of their own lane (lanes are 27.4 wide, so the original three
+   lanes run 9–36.3–63.7–91). Changing layout moves the road around the
+   viewer, never the viewer: the vanishing point and perspective stay put.
+   `surface`: the asphalt incl. shoulders [left, right]. `marks`: lines.
+   `poles`: streetlight positions [left, right]. `bikeLanes`: lanes running
+   our way that a motorcycle may use beside us. `oncoming`: the centre of an
+   oncoming lane, if any. */
+type Mark = { at: number; kind: 'edge' | 'dash' | 'cats' | 'centre' };
+interface Road {
+  surface: [number, number];
+  marks: Mark[];
+  poles: [number, number];
+  bikeLanes: ('left' | 'right')[];
+  oncoming?: number;
+}
+const ROADS: Record<RoadLayoutSetting, Road> = {
+  single: {
+    surface: [33.3, 66.7],
+    marks: [
+      { at: 36.3, kind: 'edge' },
+      { at: 63.7, kind: 'edge' },
+    ],
+    poles: [27, 73],
+    bikeLanes: [],
+  },
+  twoWay: {
+    surface: [5.9, 66.7],
+    marks: [
+      { at: 8.9, kind: 'edge' },
+      { at: 36.3, kind: 'centre' },
+      { at: 63.7, kind: 'edge' },
+    ],
+    poles: [0, 73],
+    bikeLanes: [],
+    oncoming: 22.6,
+  },
+  three: {
+    surface: [6, 94],
+    marks: [
+      { at: 9, kind: 'edge' },
+      { at: 91, kind: 'edge' },
+      { at: 10.5, kind: 'cats' },
+      { at: 89.5, kind: 'cats' },
+      { at: 36.3, kind: 'dash' },
+      { at: 63.7, kind: 'dash' },
+    ],
+    poles: [3, 97],
+    bikeLanes: ['left', 'right'],
+  },
+  motorway: {
+    surface: [-21.5, 121.5],
+    marks: [
+      { at: -18.5, kind: 'edge' },
+      { at: 118.5, kind: 'edge' },
+      { at: -17, kind: 'cats' },
+      { at: 117, kind: 'cats' },
+      { at: 8.9, kind: 'dash' },
+      { at: 36.3, kind: 'dash' },
+      { at: 63.7, kind: 'dash' },
+      { at: 91.1, kind: 'dash' },
+    ],
+    poles: [-27, 127],
+    bikeLanes: ['left', 'right'],
+  },
+};
+
+function useRoad() {
+  const { settings } = useSettings();
+  return ROADS[settings.roadLayout] ?? ROADS.three;
+}
+
+/** The asphalt and its markings, for the windshield (`prefix` 'road') or the
+ *  mirror ('rv'). */
+function RoadMarkings({ road, prefix }: { road: Road; prefix: 'road' | 'rv' }) {
+  const [l, r] = road.surface;
+  const shoulder = (2 / (r - l)) * 100;
+  return (
+    <>
+      <div
+        className="road-surface"
+        style={{ left: `${l}%`, width: `${r - l}%`, '--shoulder': `${shoulder}%` } as CSSProperties}
+      />
+      {road.marks.map((m, i) => (
+        <div
+          key={i}
+          className={`${prefix}-mark ${m.kind === 'dash' ? 'lane-dash' : m.kind === 'cats' ? 'cats-eye' : m.kind}`}
+          style={{ left: `${m.at}%` }}
+        />
+      ))}
+    </>
   );
 }
 
@@ -579,6 +714,7 @@ function useDrivePace(root: RefObject<HTMLDivElement | null>) {
 
 export function Windshield() {
   const city = useCity();
+  const road = useRoad();
   const root = useRef<HTMLDivElement>(null);
   useDrivePace(root);
   return (
@@ -606,13 +742,9 @@ export function Windshield() {
       {/* Road */}
       <div className="ground">
         <div className="road-plane">
-          <div className="road-mark edge" style={{ left: '9%' }} />
-          <div className="road-mark edge" style={{ right: '9%' }} />
-          <div className="road-mark cats-eye" style={{ left: '10.5%' }} />
-          <div className="road-mark cats-eye" style={{ right: '10.5%' }} />
-          <div className="road-mark lane-dash" style={{ left: '36.3%' }} />
-          <div className="road-mark lane-dash" style={{ right: '36.3%' }} />
+          <RoadMarkings road={road} prefix="road" />
           <Motorcycle />
+          <Oncoming />
           <LeadCar />
           {Array.from({ length: POLE_COUNT }, (_, i) => (
             <div
@@ -620,8 +752,8 @@ export function Windshield() {
               className="pole-track"
               style={{ '--d': `${(-i * POLE_CYCLE_S) / POLE_COUNT}s` } as React.CSSProperties}
             >
-              <div className="pole left" />
-              <div className="pole right" />
+              <div className="pole left" style={{ left: `${road.poles[0]}%` }} />
+              <div className="pole right" style={{ right: `${100 - road.poles[1]}%` }} />
             </div>
           ))}
         </div>

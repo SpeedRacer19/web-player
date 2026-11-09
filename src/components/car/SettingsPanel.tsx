@@ -261,6 +261,12 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
               note="off: a clear road (the motorcycle can take the middle lane)"
               labels={{ coupe: 'Coupe', pickup: 'Pickup', classic: 'Classic', van: 'Van', off: 'Off' }}
             />
+            <Choice
+              name="roadLayout"
+              label="Road"
+              note="you stay in the middle of your lane"
+              labels={{ single: 'Single lane', twoWay: 'Two-way', three: 'Three lanes', motorway: 'Motorway' }}
+            />
           </Section>
         </div>
 
