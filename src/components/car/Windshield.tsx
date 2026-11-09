@@ -57,7 +57,7 @@ function Skyline({ layer, className, fill, windowFill }: {
 
 /** Rear view of the car ahead: silhouette, rear window catching the sunset,
  *  a lit tail-light bar. It stands on the 3D road plane, so perspective sizes it. */
-function LeadCar() {
+function CoupeArt() {
   return (
     <svg viewBox="0 0 200 92" className="block h-full w-full" aria-hidden>
       <defs>
@@ -97,6 +97,129 @@ function LeadCar() {
         <rect x="54" y="49" width="92" height="2.5" rx="1" fill="var(--taillight)" fillOpacity="0.8" />
       </g>
     </svg>
+  );
+}
+
+/** Shared paint for the other cars ahead (only one car is ever on screen, so
+ *  the ids can't clash). */
+function CarDefs() {
+  return (
+    <defs>
+      <linearGradient id="lc-body" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#3a2640" />
+        <stop offset="0.25" stopColor="#1a1120" />
+        <stop offset="1" stopColor="#0b070e" />
+      </linearGradient>
+      <linearGradient id="lc-glass" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#ff9a6a" stopOpacity="0.55" />
+        <stop offset="1" stopColor="#2a1030" stopOpacity="0.9" />
+      </linearGradient>
+      <filter id="lc-glow" x="-50%" y="-200%" width="200%" height="500%">
+        <feGaussianBlur stdDeviation="3" result="b" />
+        <feMerge>
+          <feMergeNode in="b" />
+          <feMergeNode in="SourceGraphic" />
+        </feMerge>
+      </filter>
+    </defs>
+  );
+}
+
+/** A pickup truck: the cab and its rear window above a tall tailgate,
+ *  vertical tail lights at the corners, a third brake light on the roof. */
+function PickupArt() {
+  return (
+    <svg viewBox="0 0 200 112" className="block h-full w-full" aria-hidden>
+      <CarDefs />
+      <rect x="14" y="92" width="32" height="20" rx="4" fill="#050306" />
+      <rect x="154" y="92" width="32" height="20" rx="4" fill="#050306" />
+      <path d="M44 50 L52 14 Q54 8 62 8 H138 Q146 8 148 14 L156 50 Z" fill="url(#lc-body)" />
+      <path d="M57 44 L63 18 H137 L143 44 Z" fill="url(#lc-glass)" />
+      <path d="M52 14 Q54 8 62 8 H138 Q146 8 148 14" stroke="#ff8a6a" strokeOpacity="0.5" strokeWidth="1.5" fill="none" />
+      <rect x="6" y="48" width="188" height="50" rx="6" fill="url(#lc-body)" />
+      <path d="M8 49 H192" stroke="#ff8a6a" strokeOpacity="0.35" strokeWidth="1.2" />
+      <rect x="24" y="56" width="152" height="30" rx="3" fill="#0f0a12" fillOpacity="0.55" />
+      <rect x="92" y="60" width="16" height="3" rx="1.5" fill="#2a2230" />
+      <rect x="4" y="92" width="192" height="10" rx="3" fill="#0a070c" />
+      <rect x="84" y="80" width="32" height="10" rx="1.5" fill="#cfc6b8" fillOpacity="0.35" />
+      <g filter="url(#lc-glow)">
+        <rect x="8" y="52" width="10" height="26" rx="2" fill="var(--taillight)" />
+        <rect x="182" y="52" width="10" height="26" rx="2" fill="var(--taillight)" />
+        <rect x="88" y="10" width="24" height="2.5" rx="1" fill="var(--taillight)" fillOpacity="0.85" />
+      </g>
+    </svg>
+  );
+}
+
+/** A late-fifties sedan: low roof, tail fins rising at the corners, round
+ *  tail lights, a chrome bumper. */
+function ClassicArt() {
+  return (
+    <svg viewBox="0 0 220 90" className="block h-full w-full" aria-hidden>
+      <CarDefs />
+      <rect x="24" y="72" width="30" height="18" rx="4" fill="#050306" />
+      <rect x="166" y="72" width="30" height="18" rx="4" fill="#050306" />
+      <path d="M58 42 L72 13 Q75 8 82 8 H138 Q145 8 148 13 L162 42 Z" fill="url(#lc-body)" />
+      <path d="M68 39 L78 16 H142 L152 39 Z" fill="url(#lc-glass)" />
+      <path d="M72 13 Q75 8 82 8 H138 Q145 8 148 13" stroke="#ff8a6a" strokeOpacity="0.5" strokeWidth="1.5" fill="none" />
+      <path d="M8 74 V50 L13 28 L22 41 H198 L207 28 L212 50 V74 Q110 80 8 74 Z" fill="url(#lc-body)" />
+      <path d="M13 28 L22 41 H198 L207 28" stroke="#ff8a6a" strokeOpacity="0.45" strokeWidth="1.2" fill="none" />
+      <path d="M40 52 H180" stroke="#0b070e" strokeWidth="1.5" />
+      <rect x="6" y="66" width="208" height="8" rx="4" fill="#9a92a2" fillOpacity="0.5" />
+      <rect x="94" y="56" width="32" height="9" rx="1.5" fill="#cfc6b8" fillOpacity="0.35" />
+      <g filter="url(#lc-glow)">
+        <circle cx="19" cy="49" r="5.5" fill="var(--taillight)" />
+        <circle cx="201" cy="49" r="5.5" fill="var(--taillight)" />
+        <circle cx="19" cy="60" r="3.5" fill="var(--taillight)" fillOpacity="0.8" />
+        <circle cx="201" cy="60" r="3.5" fill="var(--taillight)" fillOpacity="0.8" />
+      </g>
+    </svg>
+  );
+}
+
+/** A van: a tall box with two rear windows, split doors, tall tail lights. */
+function VanArt() {
+  return (
+    <svg viewBox="0 0 190 130" className="block h-full w-full" aria-hidden>
+      <CarDefs />
+      <rect x="16" y="112" width="30" height="18" rx="4" fill="#050306" />
+      <rect x="144" y="112" width="30" height="18" rx="4" fill="#050306" />
+      <rect x="10" y="8" width="170" height="112" rx="12" fill="url(#lc-body)" />
+      <path d="M14 18 Q14 8 26 8 H164 Q176 8 176 18" stroke="#ff8a6a" strokeOpacity="0.45" strokeWidth="1.5" fill="none" />
+      <rect x="24" y="20" width="64" height="40" rx="4" fill="url(#lc-glass)" />
+      <rect x="102" y="20" width="64" height="40" rx="4" fill="url(#lc-glass)" />
+      <path d="M95 14 V110" stroke="#0a070c" strokeWidth="2" />
+      <rect x="100" y="72" width="10" height="3" rx="1.5" fill="#2a2230" />
+      <rect x="6" y="108" width="178" height="10" rx="3" fill="#0a070c" />
+      <rect x="79" y="92" width="32" height="10" rx="1.5" fill="#cfc6b8" fillOpacity="0.35" />
+      <g filter="url(#lc-glow)">
+        <rect x="12" y="62" width="8" height="34" rx="2" fill="var(--taillight)" />
+        <rect x="170" y="62" width="8" height="34" rx="2" fill="var(--taillight)" />
+      </g>
+    </svg>
+  );
+}
+
+/** The car ahead, as chosen in SETUP: its art, the art's aspect, and its
+ *  width on the road plane (the coupe is 13%; the others in proportion). */
+const CARS = {
+  coupe: { Art: CoupeArt, aspect: '200 / 92', width: '13%' },
+  pickup: { Art: PickupArt, aspect: '200 / 112', width: '14%' },
+  classic: { Art: ClassicArt, aspect: '220 / 90', width: '14.5%' },
+  van: { Art: VanArt, aspect: '190 / 130', width: '13.5%' },
+} as const;
+
+function LeadCar() {
+  const { settings } = useSettings();
+  if (settings.leadCar === 'off') return null;
+  const car = CARS[settings.leadCar];
+  return (
+    <>
+      <div className="lead-car-glow" />
+      <div className="lead-car" style={{ width: car.width, aspectRatio: car.aspect }}>
+        <car.Art />
+      </div>
+    </>
   );
 }
 
@@ -395,7 +518,9 @@ function Motorcycle() {
   const { settings } = useSettings();
   const [ride, clear] = useRandomEvent(30, 70, settings.motorcycle);
   if (!ride || !settings.motorcycle) return null;
-  const side = ride.r < 0.5 ? 'left' : 'right';
+  // With no car ahead the centre lane is free too.
+  const lanes = settings.leadCar === 'off' ? (['left', 'center', 'right'] as const) : (['left', 'right'] as const);
+  const side = lanes[Math.floor(ride.r * lanes.length)];
   return (
     <div key={ride.id} className={`bike-track ${side}`} onAnimationEnd={own(clear)}>
       <div className="bike">
@@ -488,10 +613,7 @@ export function Windshield() {
           <div className="road-mark lane-dash" style={{ left: '36.3%' }} />
           <div className="road-mark lane-dash" style={{ right: '36.3%' }} />
           <Motorcycle />
-          <div className="lead-car-glow" />
-          <div className="lead-car">
-            <LeadCar />
-          </div>
+          <LeadCar />
           {Array.from({ length: POLE_COUNT }, (_, i) => (
             <div
               key={i}

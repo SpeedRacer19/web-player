@@ -49,6 +49,10 @@ All notable changes to this player are recorded here. The format follows
   0.6×, medium 1×, high 1.45×). Lane markings, streetlights and the skyline
   drift (and the mirror) all follow, easing to the new pace over a couple of
   seconds at a song change, with no jumps. Nothing moves with reduced motion.
+- **Car ahead** (SETUP → Drive): **Coupe** (the original, default),
+  **Pickup**, **Classic** (fifties fins and round tail lights) or **Van**, or
+  **Off** for a clear road. With no car ahead, the motorcycle (if switched
+  on) can ride the centre lane too.
 
 ## [1.5.0] — 2026-11-09
 

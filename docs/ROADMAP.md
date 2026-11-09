@@ -48,7 +48,7 @@ generated from photos rather than drawn by hand. Each city needs a near and
 a far silhouette layer for the drift, as SVG data. Today's generated skyline
 stays as the default.
 
-### The car ahead
+### The car ahead (done in 2.0: coupe / pickup / classic / van / off)
 - Choose its style: a few drawings (coupe, truck, classic, van).
 - Turn it off. With no car, the road ahead is clear and the motorcycle can
   use the centre lane.

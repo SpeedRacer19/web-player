@@ -177,6 +177,12 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
               note="follow the song: its tempo, or its energy"
               labels={{ steady: 'Steady', bpm: 'Song BPM', energy: 'Song energy' }}
             />
+            <Choice
+              name="leadCar"
+              label="Car ahead"
+              note="off: a clear road (the motorcycle can take the middle lane)"
+              labels={{ coupe: 'Coupe', pickup: 'Pickup', classic: 'Classic', van: 'Van', off: 'Off' }}
+            />
           </Section>
         </div>
 

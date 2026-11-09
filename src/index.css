@@ -520,6 +520,10 @@ body {
 .bike-track.left .bike-lean {
   scale: -1 1;
 }
+.bike-track.center .bike {
+  left: 50%;
+  animation: bike-fade 12s linear forwards;
+}
 @keyframes bike-lane-left {
   0% {
     left: 15%;

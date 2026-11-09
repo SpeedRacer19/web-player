@@ -139,6 +139,9 @@ the URL at import), and `useStationFeed` resets and restarts its loop on a switc
   0.5–1.6). The windshield applies it as `playbackRate` on its driving CSS
   animations (`DRIVE_ANIMATIONS`), easing between values; never change those
   animations' durations at runtime (that makes them jump).
+- **Car ahead:** the `leadCar` setting picks one of `CARS` in `Windshield.tsx`
+  (each an SVG rear view, its aspect and its width on the road plane) or
+  'off'; with no car the motorcycle may use the centre lane.
 - `config.version` is `package.json`'s version, injected at build time as
   `__APP_VERSION__` (`vite.config.ts`). Bump `package.json` to change it.
 - **Render the current song from `heardTrack`, not `nowPlaying.nowPlaying`.**
