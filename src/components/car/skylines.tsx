@@ -4,111 +4,25 @@
 // two edges must meet cleanly. Shapes fill with the scene's skyline colours
 // and windows with its window colours, so time of day applies to every city.
 //
-// Add a city: draw a far and a near tile here (landmarks as paths, with
-// `filler()` low-rise around them), add it to SKYLINES, and to the skyline
-// choice in src/lib/settings.ts. Draw from reference, don't trace someone
-// else's artwork.
+// Add a city: describe a far and a near tile with `layer()` from
+// skylines-kit.tsx (filler low-rise, towers, landmark shapes built with its
+// helpers) in skylines-cities.tsx, add it to CITIES there, and its id to
+// SKYLINE_CHOICES in src/lib/settings.ts; its name shows in SETUP. Draw from
+// reference, don't trace someone else's artwork.
 
-import type { ReactNode } from 'react';
+import {
+  TILE_WIDTH,
+  blocks,
+  blocksArt,
+  rng,
+  windowsArt,
+  windowsIn,
+  type SkylineDef,
+  type Win,
+} from '@/components/car/skylines-kit';
+import { CITIES } from '@/components/car/skylines-cities';
 
-/** Deterministic pseudo-random, so a skyline is the same on every render. */
-export function rng(seed: number) {
-  let s = seed;
-  return () => {
-    s = (s * 1664525 + 1013904223) % 4294967296;
-    return s / 4294967296;
-  };
-}
-
-export const TILE_WIDTH = 1200;
-
-export interface SkylineLayer {
-  width: number;
-  height: number;
-  /** The tile's contents. `fill` is the silhouette colour, `windowFill` the
-   *  lit-window colour (both CSS colours, usually var(--…)). */
-  art: (fill: string, windowFill: string) => ReactNode;
-}
-
-export interface SkylineDef {
-  name: string;
-  far: SkylineLayer;
-  near: SkylineLayer;
-}
-
-// --- Shared pieces -----------------------------------------------------------
-
-interface Box {
-  x: number;
-  w: number;
-  h: number;
-}
-type Win = { x: number; y: number };
-
-/** Lit windows on a grid inside a rectangle, about `density` of them. */
-function windowsIn(r: () => number, x0: number, x1: number, y0: number, y1: number, density: number) {
-  const out: Win[] = [];
-  for (let wy = y0; wy < y1; wy += 7) {
-    for (let wx = x0; wx < x1 - 2; wx += 6) {
-      if (r() < density) out.push({ x: wx, y: wy });
-    }
-  }
-  return out;
-}
-
-/** A group of windows. `.windows` follows the time of day (--windows);
- *  `.win` flickers, so it goes on an inner group. (Plain functions, not
- *  components: this module exports data, which fast refresh wants kept
- *  apart from components.) */
-function windowsArt(list: Win[], fill: string, flicker = false) {
-  return (
-    <g className="windows">
-      <g className={flicker ? 'win' : undefined}>
-        {list.map((w, j) => (
-          <rect key={j} x={w.x} y={w.y} width={2.5} height={3} fill={fill} />
-        ))}
-      </g>
-    </g>
-  );
-}
-
-/** A run of plain rectangular buildings from x0 to x1, heights between minH
- *  and maxH, with lit windows. The last one ends exactly on x1. */
-function blocks(seed: number, x0: number, x1: number, height: number, minH: number, maxH: number, density: number) {
-  const r = rng(seed);
-  const out: (Box & { windows: Win[] })[] = [];
-  let x = x0;
-  while (x < x1) {
-    let w = 18 + Math.floor(r() * 46);
-    if (x1 - x - w < 18) w = x1 - x;
-    const h = minH + Math.floor(r() * (maxH - minH));
-    out.push({ x, w, h, windows: windowsIn(r, x + 4, x + w - 3, height - h + 6, height - 6, density) });
-    x += w + (x + w >= x1 ? 0 : Math.floor(r() * 6));
-  }
-  return out;
-}
-
-function blocksArt(
-  list: ReturnType<typeof blocks>,
-  height: number,
-  fill: string,
-  windowFill: string,
-  antennas = true,
-) {
-  return (
-    <>
-      {list.map((b, i) => (
-        <g key={i}>
-          <rect x={b.x} y={height - b.h} width={b.w} height={b.h} fill={fill} />
-          {antennas && i % 5 === 0 && (
-            <rect x={b.x + b.w / 2} y={height - b.h - 10} width={1.5} height={10} fill={fill} />
-          )}
-          {windowsArt(b.windows, windowFill, i % 3 === 0)}
-        </g>
-      ))}
-    </>
-  );
-}
+export type { SkylineLayer } from '@/components/car/skylines-kit';
 
 // --- Default: the generated city ---------------------------------------------
 
@@ -377,10 +291,11 @@ const delhi: SkylineDef = {
   },
 };
 
-export type SkylineId = 'default' | 'guangzhou' | 'delhi';
-
-export const SKYLINES: Record<SkylineId, SkylineDef> = {
+export const SKYLINES = {
   default: generated,
   guangzhou,
   delhi,
-};
+  ...CITIES,
+} satisfies Record<string, SkylineDef>;
+
+export type SkylineId = keyof typeof SKYLINES;

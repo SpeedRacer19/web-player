@@ -8,6 +8,12 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { useSettings } from '@/hooks/useSettings';
 import { CHOICES, type Settings } from '@/lib/settings';
+import { SKYLINES } from '@/components/car/skylines';
+
+/** Skyline labels come from the cities themselves. */
+const SKYLINE_LABELS = Object.fromEntries(
+  Object.entries(SKYLINES).map(([id, city]) => [id, city.name]),
+) as Record<Settings['skyline'], string>;
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -63,11 +69,14 @@ function Choice<K extends ChoiceKey>({
   label,
   note,
   labels,
+  grid = false,
 }: {
   name: K;
   label: string;
   note?: string;
   labels: Record<Settings[K], string>;
+  /** Many options: wrap them into a grid instead of one strip. */
+  grid?: boolean;
 }) {
   const { settings, set } = useSettings();
   const values = (CHOICES[name] ?? []) as readonly Settings[K][];
@@ -77,7 +86,11 @@ function Choice<K extends ChoiceKey>({
         {label}
       </div>
       {note && <div className="truncate text-[10px] opacity-60 sm:text-[11px]">{note}</div>}
-      <div role="radiogroup" aria-labelledby={`setting-${name}`} className="mt-1.5 flex gap-1">
+      <div
+        role="radiogroup"
+        aria-labelledby={`setting-${name}`}
+        className={grid ? 'mt-1.5 grid grid-cols-3 gap-1 sm:grid-cols-4' : 'mt-1.5 flex gap-1'}
+      >
         {values.map((v) => {
           const on = settings[name] === v;
           return (
@@ -151,7 +164,8 @@ export function SettingsPanel({ onClose }: { onClose: () => void }) {
               name="skyline"
               label="Skyline"
               note="the city on the horizon"
-              labels={{ default: 'Default', guangzhou: 'Guangzhou', delhi: 'Delhi' }}
+              labels={SKYLINE_LABELS}
+              grid
             />
             <Toggle name="shootingStars" label="Shooting stars" note="now and then, when the stars are out" />
             <Toggle name="motorcycle" label="Motorcycle" note="passes now and then · artwork in progress" />

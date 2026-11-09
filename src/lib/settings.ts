@@ -9,8 +9,22 @@ export type TimeOfDaySetting = 'auto' | 'dawn' | 'day' | 'dusk' | 'night';
 export const TIME_OF_DAY: readonly TimeOfDaySetting[] = ['auto', 'dawn', 'day', 'dusk', 'night'];
 
 /** The city on the horizon (src/components/car/skylines.tsx). */
-export type SkylineSetting = 'default' | 'guangzhou' | 'delhi';
-export const SKYLINE_CHOICES: readonly SkylineSetting[] = ['default', 'guangzhou', 'delhi'];
+export const SKYLINE_CHOICES = [
+  'default',
+  'guangzhou',
+  'delhi',
+  'kinshasa',
+  'jakarta',
+  'dhaka',
+  'mexicoCity',
+  'seoul',
+  'cairo',
+  'bogota',
+  'newYork',
+  'tokyo',
+  'houston',
+] as const;
+export type SkylineSetting = (typeof SKYLINE_CHOICES)[number];
 
 export interface Settings {
   /** The motorcycle that now and then passes and rides off to the horizon.

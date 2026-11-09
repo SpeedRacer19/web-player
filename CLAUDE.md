@@ -125,10 +125,14 @@ the URL at import), and `useStationFeed` resets and restarts its loop on a switc
   `--stars`, `--windows`, `--lamp-glow`, the mirror's `--rv-*`). Anything
   derived from the palette (`--dash-glow`) is re-declared on `.scene` so it
   follows. Keep new scenery colours in variables so every mode can set them.
-- **Skylines:** `src/components/car/skylines.tsx` holds each city as a FAR and
-  a NEAR 1200-unit SVG tile (`art(fill, windowFill)`), repeated and drifted by
-  the windshield; the mirror uses the NEAR tile. The `skyline` setting picks
-  one (`SKYLINES`). Fill with the passed colours so time of day applies; draw
+- **Skylines:** each city is a FAR and a NEAR 1200-unit SVG tile
+  (`art(fill, windowFill)`), repeated and drifted by the windshield; the
+  mirror uses the NEAR tile. `skylines-kit.tsx` has the helpers (filler,
+  windows, `stepped`/`taper`/`dome`/`onion`/`pagoda`/… path builders) and
+  `layer()` to build a tile from a short spec; `skylines-cities.tsx` holds
+  most cities; `skylines.tsx` has Default, Guangzhou, Delhi and the
+  `SKYLINES` registry. The `skyline` setting (ids in `SKYLINE_CHOICES`)
+  picks one; SETUP labels come from each city's `name`. Fill with the passed colours so time of day applies; draw
   cities from reference rather than tracing others' artwork.
 - `config.version` is `package.json`'s version, injected at build time as
   `__APP_VERSION__` (`vite.config.ts`). Bump `package.json` to change it.

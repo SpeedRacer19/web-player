@@ -12,7 +12,8 @@
 import { useCallback, useEffect, useState, type AnimationEvent, type CSSProperties } from 'react';
 import { useSettings } from '@/hooks/useSettings';
 import { useTimeOfDay } from '@/hooks/useTimeOfDay';
-import { SKYLINES, rng, type SkylineLayer } from '@/components/car/skylines';
+import { SKYLINES, type SkylineLayer } from '@/components/car/skylines';
+import { rng } from '@/components/car/skylines-kit';
 
 /** The city chosen in SETUP (skylines.tsx). */
 function useCity() {

@@ -31,7 +31,16 @@ All notable changes to this player are recorded here. The format follows
   time of day like the default, and the rear-view mirror shows it too.
   **Delhi**: Qutub Minar and Humayun's Tomb with the newer high-rises behind;
   India Gate, the Lotus Temple, Jama Masjid and the Red Fort's Lahori Gate in
-  front.
+  front. Plus **Kinshasa** (Tour de l'Échangeur, Lumumba monument, palms),
+  **Jakarta** (Monas, Istiqlal, Autograph Tower), **Dhaka** (Parliament
+  House, Shaheed Minar, Martyrs' Memorial), **Mexico City** (Popocatépetl,
+  Torre Latinoamericana, the Angel, Bellas Artes), **Seoul** (N Seoul Tower,
+  Lotte World Tower, Namdaemun), **Cairo** (the pyramids, Cairo Tower, the
+  Citadel, feluccas), **Bogotá** (Monserrate, BD Bacatá, Capitolio),
+  **New York** (Empire State, Chrysler, One WTC, Brooklyn Bridge, Liberty),
+  **Tokyo** (Mt Fuji, Skytree, Tokyo Tower, pagoda, torii, Rainbow Bridge)
+  and **Houston** (Bank of America Center, Pennzoil Place, San Jacinto
+  Monument, the Astrodome). SETUP lists them in a grid.
 
 ## [1.5.0] — 2026-11-09
 
