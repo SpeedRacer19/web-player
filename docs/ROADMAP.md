@@ -26,6 +26,33 @@ The lane markings, the car ahead, the streetlights, the motorcycle's lane and
 the rear-view mirror would all follow the chosen layout. It would be a setting
 in the dashboard above.
 
+### Time of day
+Swap the scene's colour palette (the CSS variables at the top of
+`src/index.css`): dawn, midday, dusk (today) and night. Details follow
+along: the sun rising instead of setting, fewer lit windows at dawn,
+streetlights off by day, stars only at night. The rear-view mirror shows the
+opposite sky. Option: follow the clock (station or listener local time).
+
+### City skylines
+Real cities (e.g. New York, Tokyo, Paris), from existing artwork or
+generated from photos rather than drawn by hand. Each city needs a near and
+a far silhouette layer for the drift, as SVG data. Today's generated skyline
+stays as the default.
+
+### The car ahead
+- Choose its style: a few drawings (coupe, truck, classic, van).
+- Turn it off. With no car, the road ahead is clear and the motorcycle can
+  use the centre lane.
+
+### Driving speed
+How fast our car travels (lane markings, streetlights, skyline drift):
+fixed, follow the song's BPM, or follow its energy. Ease between speeds at
+song changes, cap the extremes, and stay still with reduced motion.
+
+All of these are settings in the dashboard above, alongside road layouts and
+the existing motorcycle and shooting-star switches. Time of day and city
+could also come as presets.
+
 ## Still open (no version yet)
 
 - **Accessibility pass:** volume knob as a keyboard slider, arrow keys in the
