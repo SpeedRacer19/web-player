@@ -279,21 +279,22 @@ function ShootingStar() {
   );
 }
 
-/** Rear view of a motorcycle and rider, as you'd see it pulling away: tyre,
- *  fender with tail light and plate, exhaust, the rider's back with arms out
- *  to the bars and mirrors, knees out, and the sunset catching the helmet
- *  and shoulders. */
+/** A motorcycle and rider seen from behind and a little to the left (as a
+ *  bike in the right lane looks from our seat): tyre, fender, tail light and
+ *  plate square on; the left side of the engine, exhaust and the front wheel
+ *  showing beyond; the rider's near arm out to the bars. Mirrored for the left
+ *  lane, where we see its right side. */
 function MotorcycleArt() {
   return (
-    <svg viewBox="0 0 60 100" className="block h-full w-full overflow-visible" aria-hidden>
+    <svg viewBox="0 0 70 100" className="block h-full w-full overflow-visible" aria-hidden>
       <defs>
         <linearGradient id="mc-jacket" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#35243c" />
           <stop offset="1" stopColor="#100a14" />
         </linearGradient>
-        <linearGradient id="mc-body" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#2a1f30" />
-          <stop offset="1" stopColor="#09060b" />
+        <linearGradient id="mc-body" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#120c16" />
+          <stop offset="1" stopColor="#2c2032" />
         </linearGradient>
         <filter id="mc-glow" x="-100%" y="-200%" width="300%" height="500%">
           <feGaussianBlur stdDeviation="1.4" result="b" />
@@ -303,59 +304,59 @@ function MotorcycleArt() {
           </feMerge>
         </filter>
       </defs>
-      {/* mirrors and handlebar ends, beyond the shoulders */}
-      <path d="M8 44 L4 38 M52 44 L56 38" stroke="#140d18" strokeWidth="1.6" strokeLinecap="round" />
-      <ellipse cx="3.5" cy="36" rx="3" ry="2.2" fill="#1b1220" stroke="#ff8a6a" strokeOpacity="0.35" strokeWidth="0.6" />
-      <ellipse cx="56.5" cy="36" rx="3" ry="2.2" fill="#1b1220" stroke="#ff8a6a" strokeOpacity="0.35" strokeWidth="0.6" />
-      {/* arms out to the grips */}
-      <path d="M20 40 Q13 42 8 46 M40 40 Q47 42 52 46" stroke="#1a1120" strokeWidth="4.5" strokeLinecap="round" fill="none" />
-      {/* tyre */}
-      <rect x="25" y="70" width="10" height="30" rx="4.5" fill="#050306" />
-      <rect x="28.5" y="72" width="3" height="26" rx="1.5" fill="#1a161e" />
-      {/* knees and boots out to the pegs */}
-      <path d="M21 60 Q14 64 15 72 L13 78 M39 60 Q46 64 45 72 L47 78" stroke="#120c16" strokeWidth="5" strokeLinecap="round" fill="none" />
-      {/* tank, seat and fender */}
-      <path d="M18 58 Q30 52 42 58 L40 68 Q30 72 20 68 Z" fill="url(#mc-body)" />
-      <path d="M23 68 Q30 64 37 68 L36 74 H24 Z" fill="#0d0910" />
-      {/* exhaust, catching a little light */}
-      <path d="M38 70 L44 82" stroke="#3b3444" strokeWidth="3.4" strokeLinecap="round" />
-      <path d="M38.6 69.4 L44.2 80.6" stroke="#ff9a6a" strokeOpacity="0.35" strokeWidth="0.8" strokeLinecap="round" />
-      {/* rider's back and shoulders */}
-      <path d="M18 60 Q16 42 21 36 Q30 31 39 36 Q44 42 42 60 Q30 64 18 60 Z" fill="url(#mc-jacket)" />
-      <path d="M21 36 Q30 31 39 36" stroke="#ff8a6a" strokeOpacity="0.4" strokeWidth="1" fill="none" />
+      {/* front wheel, further away, beyond the bike's side */}
+      <ellipse cx="15" cy="84" rx="4" ry="12" fill="#050306" />
+      {/* near-side handlebar end and mirror */}
+      <path d="M14 47 L9 40" stroke="#140d18" strokeWidth="1.6" strokeLinecap="round" />
+      <ellipse cx="8" cy="38.5" rx="3" ry="2.2" fill="#1b1220" stroke="#ff8a6a" strokeOpacity="0.35" strokeWidth="0.6" />
+      {/* the bike's left side: tank and engine, reaching forward */}
+      <path d="M13 62 Q24 55 41 58 L43 72 Q30 78 15 76 Z" fill="url(#mc-body)" />
+      <path d="M20 68 H34 M21 72 H33" stroke="#3b3444" strokeWidth="1" strokeLinecap="round" />
+      {/* exhaust on this side, catching the light */}
+      <path d="M30 76 L48 84" stroke="#3b3444" strokeWidth="3.4" strokeLinecap="round" />
+      <path d="M30.5 75 L48 82.8" stroke="#ff9a6a" strokeOpacity="0.35" strokeWidth="0.8" strokeLinecap="round" />
+      {/* rear tyre, square on, with a sliver of its side */}
+      <rect x="35" y="70" width="12" height="30" rx="5" fill="#050306" />
+      <rect x="38.5" y="72" width="3" height="26" rx="1.5" fill="#1a161e" />
+      {/* near leg: knee out, boot on the peg */}
+      <path d="M28 60 Q19 63 21 71 L18 78" stroke="#120c16" strokeWidth="5" strokeLinecap="round" fill="none" />
+      {/* near arm out to the bars */}
+      <path d="M28 40 Q19 43 14 47" stroke="#1a1120" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+      {/* rider's back, turned a touch */}
+      <path d="M25 60 Q23 42 28 36 Q37 31 46 37 Q50 44 48 60 Q37 64 25 60 Z" fill="url(#mc-jacket)" />
+      <path d="M28 36 Q37 31 46 37" stroke="#ff8a6a" strokeOpacity="0.4" strokeWidth="1" fill="none" />
+      {/* far-side mirror just showing past the shoulder */}
+      <ellipse cx="55" cy="37" rx="2.6" ry="2" fill="#1b1220" stroke="#ff8a6a" strokeOpacity="0.3" strokeWidth="0.6" />
       {/* helmet, with the sunset on top */}
-      <circle cx="30" cy="25" r="8.5" fill="#1d1323" />
-      <path d="M22.5 22 Q30 13.5 37.5 22" stroke="#ff9a6a" strokeOpacity="0.6" strokeWidth="1.4" fill="none" />
-      <path d="M26 31 H34" stroke="#0b070e" strokeWidth="2" strokeLinecap="round" />
-      {/* tail light and plate */}
+      <circle cx="37" cy="25" r="8.5" fill="#1d1323" />
+      <path d="M29.5 22 Q37 13.5 44.5 22" stroke="#ff9a6a" strokeOpacity="0.6" strokeWidth="1.4" fill="none" />
+      <path d="M33 31 H41" stroke="#0b070e" strokeWidth="2" strokeLinecap="round" />
+      {/* fender, tail light and plate */}
+      <path d="M33 68 Q41 63 49 68 L48 74 H34 Z" fill="#0d0910" />
       <g filter="url(#mc-glow)">
-        <rect x="24.5" y="66" width="11" height="3" rx="1.5" fill="var(--taillight)" />
+        <rect x="35.5" y="65.5" width="11" height="3" rx="1.5" fill="var(--taillight)" />
       </g>
-      <rect x="26.5" y="74.5" width="7" height="4" rx="0.6" fill="#cfc6b8" fillOpacity="0.28" />
+      <rect x="37.5" y="74.5" width="7" height="4" rx="0.6" fill="#cfc6b8" fillOpacity="0.28" />
     </svg>
   );
 }
 
 /** Every 30–70s (if the listener hasn't switched it off) a motorcycle comes
  *  up beside us from the left or right, eases into that lane and rides off
- *  over the horizon. It's a flat sprite moved along the lane's path (see
- *  .bike in index.css), so it stays upright instead of being sheared by the
- *  3D road's perspective. */
+ *  toward the horizon. It rides on the 3D road plane like the car ahead, so
+ *  its size at any distance matches the car's; it's stood up to face us
+ *  squarely (see .bike), so perspective scales it without shearing it. */
 function Motorcycle() {
   const { settings } = useSettings();
   const [ride, clear] = useRandomEvent(30, 70, settings.motorcycle);
   if (!ride || !settings.motorcycle) return null;
+  const side = ride.r < 0.5 ? 'left' : 'right';
   return (
-    <div className="bike-lane">
-      <div
-        key={ride.id}
-        className="bike"
-        style={{ '--bike-dir': ride.r < 0.5 ? -1 : 1 } as CSSProperties}
-        onAnimationEnd={(e) => {
-          if (e.animationName === 'bike-away') clear();
-        }}
-      >
-        <MotorcycleArt />
+    <div key={ride.id} className={`bike-track ${side}`} onAnimationEnd={own(clear)}>
+      <div className="bike">
+        <div className="bike-lean">
+          <MotorcycleArt />
+        </div>
       </div>
     </div>
   );
@@ -397,6 +398,7 @@ export function Windshield() {
           <div className="road-mark cats-eye" style={{ right: '10.5%' }} />
           <div className="road-mark lane-dash" style={{ left: '36.3%' }} />
           <div className="road-mark lane-dash" style={{ right: '36.3%' }} />
+          <Motorcycle />
           <div className="lead-car-glow" />
           <div className="lead-car">
             <LeadCar />
@@ -414,7 +416,6 @@ export function Windshield() {
         </div>
       </div>
 
-      <Motorcycle />
       <div className="horizon-haze" />
 
       {/* Cabin framing: glare on the glass, A-pillars + headliner, mirror, wheel. */}

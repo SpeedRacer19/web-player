@@ -13,8 +13,10 @@ All notable changes to this player are recorded here. The format follows
 - **Shooting stars:** every 8–25 seconds, at random, a faint streak crosses the
   upper sky in under a second.
 - **A passing motorcycle:** every 30–70 seconds a rider comes up beside you
-  from the left or right, leans into the lane and rides off toward the
-  horizon, staying upright and on its lane all the way out.
+  from the left or right, leans into the lane and rides off past the car
+  ahead into the haze on the horizon. It's drawn three-quarters from behind
+  (you see the side nearest you, mirrored per lane) and kept in proportion
+  with the car at every distance.
 - **Listener settings** (groundwork for a settings dashboard): a small saved
   store with switches for the motorcycle and for shooting stars, both on by
   default. Turning one off stops it appearing, in every open tab.
