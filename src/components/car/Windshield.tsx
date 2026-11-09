@@ -6,9 +6,11 @@
 // A few things happen at random, to keep the drive alive without drawing the
 // eye: stars shimmer on their own rhythms, a shooting star now and then, and
 // once in a while a motorcycle comes up beside us and rides off to the
-// horizon. None of it spawns in a background tab or with reduced motion on.
+// horizon. None of it spawns in a background tab or with reduced motion on,
+// and the listener can switch the optional bits off (useSettings).
 
 import { useCallback, useEffect, useState, type AnimationEvent, type CSSProperties } from 'react';
+import { useSettings } from '@/hooks/useSettings';
 
 // Deterministic pseudo-random so the skyline is the same on every render.
 function rng(seed: number) {
@@ -222,13 +224,14 @@ function Stars() {
   );
 }
 
-/** Fires an event at a random interval between `minS` and `maxS` seconds.
- *  Skipped while the tab is hidden or the listener prefers reduced motion.
- *  Returns the current event (a fresh id and a random 0–1 to place it) and a
- *  function to clear it once its animation has finished. */
-function useRandomEvent(minS: number, maxS: number) {
+/** Fires an event at a random interval between `minS` and `maxS` seconds,
+ *  while `enabled`. Skipped while the tab is hidden or the listener prefers
+ *  reduced motion. Returns the current event (a fresh id and a random 0–1 to
+ *  place it) and a function to clear it once its animation has finished. */
+function useRandomEvent(minS: number, maxS: number, enabled = true) {
   const [event, setEvent] = useState<{ id: number; r: number } | null>(null);
   useEffect(() => {
+    if (!enabled) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
     let timer: number;
     const schedule = () => {
@@ -242,7 +245,7 @@ function useRandomEvent(minS: number, maxS: number) {
     };
     schedule();
     return () => window.clearTimeout(timer);
-  }, [minS, maxS]);
+  }, [minS, maxS, enabled]);
   const clear = useCallback(() => setEvent(null), []);
   return [event, clear] as const;
 }
@@ -254,8 +257,9 @@ const own = (fn: () => void) => (e: AnimationEvent) => {
 
 /** A faint streak across the upper sky, every 8–25s. */
 function ShootingStar() {
-  const [shot, clear] = useRandomEvent(8, 25);
-  if (!shot) return null;
+  const { settings } = useSettings();
+  const [shot, clear] = useRandomEvent(8, 25, settings.shootingStars);
+  if (!shot || !settings.shootingStars) return null;
   const r = rng(Math.floor(shot.r * 1e9));
   const leftward = r() < 0.5;
   const angle = 14 + r() * 22; // degrees below horizontal
@@ -275,55 +279,82 @@ function ShootingStar() {
   );
 }
 
-/** Rear view of a motorcycle and rider: a dark silhouette with the sunset on
- *  the helmet and a glowing tail light. */
+/** Rear view of a motorcycle and rider, as you'd see it pulling away: tyre,
+ *  fender with tail light and plate, exhaust, the rider's back with arms out
+ *  to the bars and mirrors, knees out, and the sunset catching the helmet
+ *  and shoulders. */
 function MotorcycleArt() {
   return (
-    <svg viewBox="0 0 40 72" className="block h-full w-full" aria-hidden>
+    <svg viewBox="0 0 60 100" className="block h-full w-full overflow-visible" aria-hidden>
       <defs>
-        <linearGradient id="mc-body" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#3a2640" />
-          <stop offset="1" stopColor="#0b070e" />
+        <linearGradient id="mc-jacket" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#35243c" />
+          <stop offset="1" stopColor="#100a14" />
         </linearGradient>
-        <filter id="mc-glow" x="-100%" y="-100%" width="300%" height="300%">
-          <feGaussianBlur stdDeviation="1.6" result="b" />
+        <linearGradient id="mc-body" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#2a1f30" />
+          <stop offset="1" stopColor="#09060b" />
+        </linearGradient>
+        <filter id="mc-glow" x="-100%" y="-200%" width="300%" height="500%">
+          <feGaussianBlur stdDeviation="1.4" result="b" />
           <feMerge>
             <feMergeNode in="b" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
       </defs>
-      {/* rear tyre */}
-      <rect x="16" y="52" width="8" height="20" rx="3" fill="#050306" />
-      {/* bike body + seat */}
-      <path d="M11 40 Q20 34 29 40 L27 54 H13 Z" fill="url(#mc-body)" />
-      {/* rider: torso, arms to the bars, helmet with sunset on top */}
-      <path d="M12 38 Q13 22 20 20 Q27 22 28 38 Z" fill="url(#mc-body)" />
-      <path d="M12 30 L5 34 M28 30 L35 34" stroke="#160f1b" strokeWidth="3" strokeLinecap="round" />
-      <circle cx="20" cy="13" r="7.5" fill="#1a1120" />
-      <path d="M13.5 11 Q20 4 26.5 11" stroke="#ff8a6a" strokeOpacity="0.55" strokeWidth="1.5" fill="none" />
-      {/* tail light + plate */}
+      {/* mirrors and handlebar ends, beyond the shoulders */}
+      <path d="M8 44 L4 38 M52 44 L56 38" stroke="#140d18" strokeWidth="1.6" strokeLinecap="round" />
+      <ellipse cx="3.5" cy="36" rx="3" ry="2.2" fill="#1b1220" stroke="#ff8a6a" strokeOpacity="0.35" strokeWidth="0.6" />
+      <ellipse cx="56.5" cy="36" rx="3" ry="2.2" fill="#1b1220" stroke="#ff8a6a" strokeOpacity="0.35" strokeWidth="0.6" />
+      {/* arms out to the grips */}
+      <path d="M20 40 Q13 42 8 46 M40 40 Q47 42 52 46" stroke="#1a1120" strokeWidth="4.5" strokeLinecap="round" fill="none" />
+      {/* tyre */}
+      <rect x="25" y="70" width="10" height="30" rx="4.5" fill="#050306" />
+      <rect x="28.5" y="72" width="3" height="26" rx="1.5" fill="#1a161e" />
+      {/* knees and boots out to the pegs */}
+      <path d="M21 60 Q14 64 15 72 L13 78 M39 60 Q46 64 45 72 L47 78" stroke="#120c16" strokeWidth="5" strokeLinecap="round" fill="none" />
+      {/* tank, seat and fender */}
+      <path d="M18 58 Q30 52 42 58 L40 68 Q30 72 20 68 Z" fill="url(#mc-body)" />
+      <path d="M23 68 Q30 64 37 68 L36 74 H24 Z" fill="#0d0910" />
+      {/* exhaust, catching a little light */}
+      <path d="M38 70 L44 82" stroke="#3b3444" strokeWidth="3.4" strokeLinecap="round" />
+      <path d="M38.6 69.4 L44.2 80.6" stroke="#ff9a6a" strokeOpacity="0.35" strokeWidth="0.8" strokeLinecap="round" />
+      {/* rider's back and shoulders */}
+      <path d="M18 60 Q16 42 21 36 Q30 31 39 36 Q44 42 42 60 Q30 64 18 60 Z" fill="url(#mc-jacket)" />
+      <path d="M21 36 Q30 31 39 36" stroke="#ff8a6a" strokeOpacity="0.4" strokeWidth="1" fill="none" />
+      {/* helmet, with the sunset on top */}
+      <circle cx="30" cy="25" r="8.5" fill="#1d1323" />
+      <path d="M22.5 22 Q30 13.5 37.5 22" stroke="#ff9a6a" strokeOpacity="0.6" strokeWidth="1.4" fill="none" />
+      <path d="M26 31 H34" stroke="#0b070e" strokeWidth="2" strokeLinecap="round" />
+      {/* tail light and plate */}
       <g filter="url(#mc-glow)">
-        <rect x="15" y="44" width="10" height="3.5" rx="1.5" fill="var(--taillight)" />
+        <rect x="24.5" y="66" width="11" height="3" rx="1.5" fill="var(--taillight)" />
       </g>
-      <rect x="16.5" y="49" width="7" height="3" rx="0.5" fill="#cfc6b8" fillOpacity="0.3" />
+      <rect x="26.5" y="74.5" width="7" height="4" rx="0.6" fill="#cfc6b8" fillOpacity="0.28" />
     </svg>
   );
 }
 
-/** Every 30–70s a motorcycle comes up beside us (from the left or right
- *  lane), settles into that lane and rides off over the horizon. It lives on
- *  the 3D road plane, so perspective shrinks it as it pulls away. */
+/** Every 30–70s (if the listener hasn't switched it off) a motorcycle comes
+ *  up beside us from the left or right, eases into that lane and rides off
+ *  over the horizon. It's a flat sprite moved along the lane's path (see
+ *  .bike in index.css), so it stays upright instead of being sheared by the
+ *  3D road's perspective. */
 function Motorcycle() {
-  const [ride, clear] = useRandomEvent(30, 70);
-  if (!ride) return null;
+  const { settings } = useSettings();
+  const [ride, clear] = useRandomEvent(30, 70, settings.motorcycle);
+  if (!ride || !settings.motorcycle) return null;
   return (
-    <div
-      key={ride.id}
-      className={`bike-track ${ride.r < 0.5 ? 'left' : 'right'}`}
-      onAnimationEnd={own(clear)}
-    >
-      <div className="bike">
+    <div className="bike-lane">
+      <div
+        key={ride.id}
+        className="bike"
+        style={{ '--dir': ride.r < 0.5 ? -1 : 1 } as CSSProperties}
+        onAnimationEnd={(e) => {
+          if (e.animationName === 'bike-away') clear();
+        }}
+      >
         <MotorcycleArt />
       </div>
     </div>
@@ -366,7 +397,6 @@ export function Windshield() {
           <div className="road-mark cats-eye" style={{ right: '10.5%' }} />
           <div className="road-mark lane-dash" style={{ left: '36.3%' }} />
           <div className="road-mark lane-dash" style={{ right: '36.3%' }} />
-          <Motorcycle />
           <div className="lead-car-glow" />
           <div className="lead-car">
             <LeadCar />
@@ -384,6 +414,7 @@ export function Windshield() {
         </div>
       </div>
 
+      <Motorcycle />
       <div className="horizon-haze" />
 
       {/* Cabin framing: glare on the glass, A-pillars + headliner, mirror, wheel. */}

@@ -177,6 +177,7 @@ src/
     useElapsed       #   client-side track clock
     useRequest       #   submit a request + poll its outcome
     useUpNext        #   what the listener hears next (buffer-aware)
+    useSettings      #   listener switches for optional features (lib/settings.ts)
     useSchedule      #   fetch /schedule once
     useMediaSession  #   OS lock-screen metadata + artwork
 

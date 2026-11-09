@@ -436,78 +436,90 @@ body {
 /* The car ahead stands on the road plane (like the poles), centred in our
    lane, so the road's perspective sizes and places it. It drifts a little
    within the lane. */
-/* A motorcycle riding away from us: the track slides along the road plane
-   from the near edge to the horizon (like .pole-track, reversed), while the
-   bike moves from beside us into its lane and fades out in the distance.
-   (The fade is on .bike, not the track: opacity on a preserve-3d element
-   would flatten it and lay the bike down on the road.) */
-.bike-track {
-  position: absolute;
-  inset: 0;
-  transform-style: preserve-3d;
-  animation: bike-ride 12s linear forwards;
+/* A motorcycle riding away from us. It's a flat sprite, not a 3D object on
+   the road plane (that would shear it off-centre), moved along its lane's
+   path to the vanishing point. One number drives it: --k, how near it is
+   (1 = at the bottom edge of the windshield, 0 = at the horizon). Position
+   and size both scale with --k, which is exactly how the road plane projects,
+   so it stays on its lane all the way out. --lane is the lane's offset at
+   the near edge (the right lane's centre is ~0.47 of the width out from the
+   middle); --dir is -1 for the left lane, 1 for the right. */
+@property --k {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 1;
 }
-/* The road plane is mostly "far away" in perspective, so the ride is paced
-   by distance: it lingers close by, pulling alongside and into its lane,
-   then dwindles toward the horizon. */
-@keyframes bike-ride {
-  /* Starts a little up the road: nearer, the outer lanes are behind the
-     windshield pillars. */
-  0% {
-    transform: translateY(-2.5%);
-  }
-  35% {
-    transform: translateY(-7%);
-  }
-  65% {
-    transform: translateY(-19%);
-  }
-  100% {
-    transform: translateY(-80%);
-  }
+@property --lane {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0.6;
+}
+.bike-lane {
+  position: absolute;
+  inset: var(--horizon) 0 0 0;
+  pointer-events: none;
 }
 .bike {
   position: absolute;
-  bottom: 0;
-  width: 3.6%;
-  aspect-ratio: 40 / 72;
+  left: calc(50% + var(--dir) * var(--lane) * 100% * var(--k));
+  top: calc(100% * var(--k));
+  width: calc(6.5% * var(--k));
+  aspect-ratio: 60 / 100;
+  translate: -50% -100%;
   transform-origin: 50% 100%;
-  transform: translateX(-50%) rotateX(-90deg);
+  animation:
+    bike-away 12s linear forwards,
+    bike-lane 12s ease-in-out forwards,
+    bike-lean 12s ease-in-out forwards;
 }
-.bike-track.left .bike {
-  animation: bike-lane-left 12s ease-out forwards;
-}
-.bike-track.right .bike {
-  animation: bike-lane-right 12s ease-out forwards;
-}
-@keyframes bike-lane-left {
+/* Distance: alongside us for a moment, then pulling away (perspective makes
+   it shrink fast at first, then crawl), fading out near the horizon. */
+@keyframes bike-away {
   0% {
-    left: 15%;
+    --k: 1.05;
+    opacity: 1;
   }
-  30% {
-    left: 23%;
+  20% {
+    --k: 0.82;
   }
-  85% {
+  45% {
+    --k: 0.48;
+  }
+  70% {
+    --k: 0.2;
+  }
+  88% {
     opacity: 1;
   }
   100% {
-    left: 23%;
+    --k: 0.04;
     opacity: 0;
   }
 }
-@keyframes bike-lane-right {
+/* From out beside us (behind the windshield pillar) into the lane. */
+@keyframes bike-lane {
   0% {
-    left: 85%;
+    --lane: 0.6;
   }
-  30% {
-    left: 77%;
-  }
-  85% {
-    opacity: 1;
-  }
+  28%,
   100% {
-    left: 77%;
-    opacity: 0;
+    --lane: 0.47;
+  }
+}
+/* A little lean toward the middle while changing lanes, then upright. */
+@keyframes bike-lean {
+  0% {
+    rotate: 0deg;
+  }
+  10% {
+    rotate: calc(var(--dir) * -6deg);
+  }
+  24% {
+    rotate: calc(var(--dir) * -2deg);
+  }
+  32%,
+  100% {
+    rotate: 0deg;
   }
 }
 
@@ -1404,7 +1416,6 @@ body {
   .stars,
   .star,
   .shooting-star,
-  .bike-track,
   .bike,
   .skyline,
   .skyline .win,

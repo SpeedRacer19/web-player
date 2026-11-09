@@ -12,9 +12,12 @@ All notable changes to this player are recorded here. The format follows
   pulsing together.
 - **Shooting stars:** every 8–25 seconds, at random, a faint streak crosses the
   upper sky in under a second.
-- **A passing motorcycle:** every 30–70 seconds a bike with a glowing tail
-  light comes up beside you from the left or right lane, settles into it and
-  rides off toward the horizon.
+- **A passing motorcycle:** every 30–70 seconds a rider comes up beside you
+  from the left or right, leans into the lane and rides off toward the
+  horizon, staying upright and on its lane all the way out.
+- **Listener settings** (groundwork for a settings dashboard): a small saved
+  store with switches for the motorcycle and for shooting stars, both on by
+  default. Turning one off stops it appearing, in every open tab.
 - All of it pauses in a background tab and stays still with reduced motion.
 
 ## [1.4.0] — 2026-11-08
