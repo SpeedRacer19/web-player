@@ -3,9 +3,9 @@
 Ideas agreed for future versions. Not commitments to dates; the CHANGELOG
 records what actually shipped.
 
-## 2.0 — make it yours
+## 2.0 — make it yours (shipped in 2.0.0)
 
-### Settings dashboard (in progress)
+### Settings dashboard (done in 2.0)
 A screen where listeners choose what they see, opened from the **hazard
 button** ("use with caution"): `src/components/car/SettingsPanel.tsx`, over
 the store in `src/lib/settings.ts` / `useSettings()`. Each feature respects
