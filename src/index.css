@@ -438,18 +438,20 @@ body {
    within the lane. */
 /* A motorcycle riding away from us. It's a flat sprite, not a 3D object on
    the road plane (that would shear it off-centre), moved along its lane's
-   path to the vanishing point. One number drives it: --k, how near it is
+   path to the vanishing point. One number drives it: --bike-k, how near it is
    (1 = at the bottom edge of the windshield, 0 = at the horizon). Position
-   and size both scale with --k, which is exactly how the road plane projects,
-   so it stays on its lane all the way out. --lane is the lane's offset at
+   and size both scale with --bike-k, which is exactly how the road plane projects,
+   so it stays on its lane all the way out. --bike-lane is the lane's offset at
    the near edge (the right lane's centre is ~0.47 of the width out from the
-   middle); --dir is -1 for the left lane, 1 for the right. */
-@property --k {
+   middle); --bike-dir is -1 for the left lane, 1 for the right. (All
+   prefixed bike-: a registered --lane would clobber the theme's lane-marking
+   colour token of the same name.) */
+@property --bike-k {
   syntax: '<number>';
   inherits: false;
   initial-value: 1;
 }
-@property --lane {
+@property --bike-lane {
   syntax: '<number>';
   inherits: false;
   initial-value: 0.6;
@@ -461,9 +463,9 @@ body {
 }
 .bike {
   position: absolute;
-  left: calc(50% + var(--dir) * var(--lane) * 100% * var(--k));
-  top: calc(100% * var(--k));
-  width: calc(6.5% * var(--k));
+  left: calc(50% + var(--bike-dir) * var(--bike-lane) * 100% * var(--bike-k));
+  top: calc(100% * var(--bike-k));
+  width: calc(6.5% * var(--bike-k));
   aspect-ratio: 60 / 100;
   translate: -50% -100%;
   transform-origin: 50% 100%;
@@ -476,34 +478,34 @@ body {
    it shrink fast at first, then crawl), fading out near the horizon. */
 @keyframes bike-away {
   0% {
-    --k: 1.05;
+    --bike-k: 1.05;
     opacity: 1;
   }
   20% {
-    --k: 0.82;
+    --bike-k: 0.82;
   }
   45% {
-    --k: 0.48;
+    --bike-k: 0.48;
   }
   70% {
-    --k: 0.2;
+    --bike-k: 0.2;
   }
   88% {
     opacity: 1;
   }
   100% {
-    --k: 0.04;
+    --bike-k: 0.04;
     opacity: 0;
   }
 }
 /* From out beside us (behind the windshield pillar) into the lane. */
 @keyframes bike-lane {
   0% {
-    --lane: 0.6;
+    --bike-lane: 0.6;
   }
   28%,
   100% {
-    --lane: 0.47;
+    --bike-lane: 0.47;
   }
 }
 /* A little lean toward the middle while changing lanes, then upright. */
@@ -512,10 +514,10 @@ body {
     rotate: 0deg;
   }
   10% {
-    rotate: calc(var(--dir) * -6deg);
+    rotate: calc(var(--bike-dir) * -6deg);
   }
   24% {
-    rotate: calc(var(--dir) * -2deg);
+    rotate: calc(var(--bike-dir) * -2deg);
   }
   32%,
   100% {

@@ -19,6 +19,8 @@ All notable changes to this player are recorded here. The format follows
   store with switches for the motorcycle and for shooting stars, both on by
   default. Turning one off stops it appearing, in every open tab.
 - All of it pauses in a background tab and stays still with reduced motion.
+- `docs/ROADMAP.md`: ideas agreed for 2.0 (settings dashboard, road layouts)
+  and items still open.
 
 ## [1.4.0] — 2026-11-08
 

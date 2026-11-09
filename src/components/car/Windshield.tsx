@@ -350,7 +350,7 @@ function Motorcycle() {
       <div
         key={ride.id}
         className="bike"
-        style={{ '--dir': ride.r < 0.5 ? -1 : 1 } as CSSProperties}
+        style={{ '--bike-dir': ride.r < 0.5 ? -1 : 1 } as CSSProperties}
         onAnimationEnd={(e) => {
           if (e.animationName === 'bike-away') clear();
         }}
